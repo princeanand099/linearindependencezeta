@@ -150,28 +150,34 @@ def scan_lean_files() -> list[dict]:
 
 
 def compute_central_factorial_payload(m: int, r: int) -> dict:
-    c1 = math.comb(r + m, 2 * m)
-    c2 = math.comb(r + m - 1, 2 * m) if (r + m - 1) >= 0 else 0
-    val_binom = Fraction(c1 + c2, 2)
-    prod = Fraction(1, 1)
-    for j in range(1, m + 1):
-        prod *= Fraction(r * r - j * j, 1)
-    val_poly = prod / Fraction(math.factorial(2 * m), 1)
+    if m == 0:
+        val_binom = Fraction(1, 1)
+        val_poly = Fraction(1, 1)
+    else:
+        c1 = math.comb(r + m, 2 * m)
+        c2 = math.comb(r + m - 1, 2 * m) if (r + m - 1) >= 0 else 0
+        val_binom = Fraction(c1 + c2, 1)
+        prod = Fraction(1, 1)
+        for t in range(m):
+            prod *= Fraction(r * r - t * t, 1)
+        val_poly = Fraction(2, math.factorial(2 * m)) * prod
     result = {
         "m": m,
         "r": r,
         "E_m_r2_poly": str(val_poly),
         "E_m_r2_binom": str(val_binom),
         "identically_equal": val_poly == val_binom,
-        "in_root_window": 1 <= r <= m,
+        "in_root_window": 0 <= r < m,
     }
-    if 1 <= r <= m:
-        sign = -1 if ((m - r) % 2 == 1) else 1
-        den = math.factorial(m - r) * math.factorial(m + r)
-        e_prime = Fraction(sign * r, den)
+    if 0 <= r < m:
+        delta_r0 = 1 if r == 0 else 0
+        sign = -1 if ((m - 1 - r) % 2 == 1) else 1
+        num = (1 + delta_r0) * sign * math.factorial(m - 1 + r) * math.factorial(m - 1 - r)
+        den = math.factorial(2 * m)
+        e_prime = Fraction(num, den)
         recip = Fraction(1, 1) / e_prime
         t_mr = sum(
-            Fraction(1, r * r - j * j) for j in range(1, m + 1) if j != r
+            Fraction(1, r * r - t * t) for t in range(m) if t != r
         )
         e_second_half = e_prime * t_mr
         result.update(
@@ -179,7 +185,7 @@ def compute_central_factorial_payload(m: int, r: int) -> dict:
                 "E_prime_r2": f"{e_prime.numerator}/{e_prime.denominator}",
                 "reciprocal_E_prime": str(recip.numerator),
                 "reciprocal_is_nonzero_int": recip.denominator == 1 and recip.numerator != 0,
-                "T_m_r": f"{t_mr.numerator}/{t_mr.denominator}",
+                "T_m_r": f"{t_mr.numerator}/{t_mr.denominator}" if t_mr.denominator != 1 else str(t_mr.numerator),
                 "half_E_double_prime_r2": f"{e_second_half.numerator}/{e_second_half.denominator}",
             }
         )

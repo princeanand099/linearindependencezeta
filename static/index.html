@@ -179,40 +179,40 @@
                 </tr>
                 <tr>
                   <td class="mono">Def. 3.1 &amp; Lemma 3.2</td>
-                  <td>Windowed Multi-Pole Kernel ℱ_{2n+1,2}^{odd,[A_0,A]}(z;P), Product-to-Closed-Form g_{k,0} Derivation, Newton Recurrence &amp; Quadratic Shift</td>
-                  <td class="mono">lemma_3_1_total_pole_multiplicity, lemma_3_1_degree_margin, lemma_3_2_gkZero_ne_zero, lemma_3_2_eq_3_6_product_eq_closed, lemma_3_2_poly_quadratic_shift_coeff</td>
+                  <td>Windowed Multi-Pole Kernel ℱ_{2n+1,2}^{odd,[A_0,A]}(z;P), Product-to-Closed-Form g_{k,0} Derivation, Newton Recurrence, Quadratic Shift &amp; Cauchy Coefficient Identity</td>
+                  <td class="mono">lemma_3_1_total_pole_multiplicity, lemma_3_1_degree_margin, lemma_3_2_gkZero_ne_zero, lemma_3_2_eq_3_6_product_eq_closed, lemma_3_2_outer_binomial_identity, lemma_3_2_poly_quadratic_shift_coeff, lemma_3_2_poly_quadratic_add_shift_coeff, lemma_3_2_laurentCoeffAt_eq_cauchy_coeff</td>
                   <td class="mono">Formalization/WindowedKernel.lean</td>
                   <td>No (100% Mathlib proof)</td>
                   <td><span class="badge badge-verified">Verified</span></td>
                 </tr>
                 <tr>
                   <td class="mono">Theorem 3.3 (i)–(ii)</td>
-                  <td>Odd Reflection Symmetry ℱ(-2AK-z;P) = -ℱ(z;P), Laurent Parity Law A_{t,2AK-k} = (-1)^{t-1}A_{t,k} &amp; Inner-Window Support Compression</td>
-                  <td class="mono">theorem_3_3_i_kernel_odd_reflection, theorem_3_3_i_laurentCoeff_reflect, theorem_3_3_i_laurent_even_pole_sum_zero, theorem_3_3_ii_inner_support_compression</td>
+                  <td>Odd Reflection Symmetry ℱ(-2AK-z;P) = -ℱ(z;P), Laurent Parity Law, Degree-Margin Simple-Pole Vanishing S₁(P)=0 &amp; Inner-Window Support Compression</td>
+                  <td class="mono">theorem_3_3_i_kernel_odd_reflection, theorem_3_3_i_laurentCoeff_reflect, theorem_3_3_i_laurent_even_pole_sum_zero, theorem_3_3_i_simple_pole_sum_zero_from_degree, theorem_3_3_ii_inner_support_compression</td>
                   <td class="mono">Formalization/WindowedKernel.lean</td>
                   <td>No (100% Mathlib proof)</td>
                   <td><span class="badge badge-verified">Verified</span></td>
                 </tr>
                 <tr>
                   <td class="mono">Theorem 3.4 &amp; 3.5</td>
-                  <td>Positive-Series Moment Representation 𝒜(P), Simple-Pole Telescoping &amp; Rising-Factorial Zero Barrier Ω_B(u)^{M_0}</td>
-                  <td class="mono">theorem_3_4_WKWeight_pos, theorem_3_4_simple_pole_telescoping, theorem_3_4_moment_decomposition, theorem_3_5_OmegaBPoly_eval_and_natDegree, theorem_3_5_binomial_identity, theorem_3_5_ii_shifted_series_truncation</td>
+                  <td>Positive-Series Moment Representation 𝒜(P), Filter.Tendsto Limits (3.16)–(3.19), Zero Barrier Ω_B(u)^{M_0} &amp; Pole-Shift Factorization (3.22)</td>
+                  <td class="mono">theorem_3_4_WKWeight_pos, theorem_3_4_simple_pole_telescoping, theorem_3_4_eq_3_18_simple_pole_limit, theorem_3_4_eq_3_19_higher_pole_limit, theorem_3_4_eq_3_16_full_series_limit, theorem_3_4_moment_decomposition, theorem_3_5_OmegaBPoly_eval_and_natDegree, theorem_3_5_binomial_identity, theorem_3_5_ii_WKBWeight_eq_and_pos, theorem_3_5_ii_shifted_series_truncation, theorem_3_5_iii_pole_shift_factorization</td>
                   <td class="mono">Formalization/WindowedKernel.lean</td>
                   <td>Yes (Top binomial index ν+2AK+BK in (3.20))</td>
                   <td><span class="badge badge-verified">Verified</span></td>
                 </tr>
                 <tr>
                   <td class="mono">Prop. 4.1 &amp; Lemma 4.2</td>
-                  <td>Inner Leibniz Jet Representation of S_{2j+1}(P) &amp; Explicit Hermite Interpolation Polynomial Basis in ℚ[X]</td>
-                  <td class="mono">prop_4_1_i_inner_weight_nonzero, prop_4_1_ii_leading_jet_weight, prop_4_1_iii_tail_vanishing, lemma_4_2_i_H0Poly_full, lemma_4_2_ii_iii_HrPoly_full</td>
+                  <td>Inner Leibniz Jet Expansion (4.2)–(4.7) of S_{2j+1}(P), Explicit Hermite Basis (H_0, ℓ_r, H_{r,0}, H_{r,1}), Logarithmic Derivative &amp; Uniqueness in ℚ[X]_{≤2A_0K}</td>
+                  <td class="mono">prop_4_1_eq_4_7_inner_pole_pairing, prop_4_1_i_poleSum_eq_S2nPlus1Functional, prop_4_1_ii_poleSum_eq_jet_expansion, prop_4_1_ii_leading_jet_weights, prop_4_1_iii_tail_vanishing, lemma_4_2_i_H0Poly_full, lemma_4_2_ii_iii_HrPoly_full, lemma_4_2_hermite_natDegree_bounds, lemma_4_2_ell_deriv_at_node, lemma_4_2_hermite_uniqueness, lemma_4_2_hermite_basis_expansion_unique</td>
                   <td class="mono">Formalization/JetSeparation.lean</td>
                   <td>No (100% Mathlib proof)</td>
                   <td><span class="badge badge-verified">Verified</span></td>
                 </tr>
                 <tr>
-                  <td class="mono">Theorem 4.3 &amp; 4.4</td>
-                  <td>Degree-Cutoff Jet Separation, Upper Unitriangularity det(E_head) = 1, Hermite Divisibility &amp; Confluent Vandermonde Det</td>
-                  <td class="mono">theorem_4_3_EHead_det_eq_one, theorem_4_3_ii_head_det, theorem_4_3_backward_hermite_divisibility_zero, theorem_4_3_iii_block_triangular_det, theorem_4_4_tail_det_pos</td>
+                  <td class="mono">Theorem 4.3, 4.4 &amp; Remark 4.5</td>
+                  <td>Degree-Cutoff Jet Separation, Leibniz Jet Reduction (4.23), Hermite Basis Testing, 4-Step Confluent Vandermonde Product (4.24)–(4.27) &amp; Odd Inner Multiplicity</td>
+                  <td class="mono">theorem_4_3_EHead_det_eq_one, theorem_4_3_ii_head_det, theorem_4_3_leibniz_jet_reduction, theorem_4_3_step2_hermite_testing, theorem_4_3_backward_hermite_divisibility_zero, theorem_4_3_iii_block_triangular_det, theorem_4_4_four_step_product_eq_closed_form, theorem_4_4_tail_det_pos, theorem_4_4_monic_tail_det_int, remark_4_5_odd_inner_multiplicity</td>
                   <td class="mono">Formalization/JetSeparation.lean</td>
                   <td>No (100% Mathlib proof)</td>
                   <td><span class="badge badge-verified">Verified</span></td>

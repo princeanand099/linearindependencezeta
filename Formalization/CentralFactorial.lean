@@ -72,6 +72,23 @@ theorem eval_centralFactorialPoly (m : ℕ) (u : ℚ) :
   · simp
   · simp [Polynomial.eval_prod]
 
+/-- **Definition 2.1 (Exact Polynomial Degree `deg_u ℰ_m = m`)**:
+For every `m ∈ ℕ`, `(centralFactorialPoly m).natDegree = m`. -/
+theorem natDegree_centralFactorialPoly (m : ℕ) :
+    (centralFactorialPoly m).natDegree = m := by
+  unfold centralFactorialPoly
+  split_ifs with hm
+  · subst hm; simp
+  · have h_c_ne : ((2 : ℚ) / ((2 * m).factorial : ℚ)) ≠ 0 :=
+      div_ne_zero two_ne_zero (by exact_mod_cast Nat.factorial_ne_zero (2 * m))
+    rw [Polynomial.natDegree_C_mul h_c_ne,
+        Polynomial.natDegree_prod_of_monic _ _ (fun t _ => Polynomial.monic_X_sub_C _)]
+    have h_deg :
+        ∀ t ∈ Finset.range m,
+          (Polynomial.X - Polynomial.C ((t : ℚ) ^ 2)).natDegree = 1 :=
+      fun t _ => Polynomial.natDegree_X_sub_C _
+    rw [Finset.sum_congr rfl h_deg, Finset.sum_const, Finset.card_range, smul_eq_mul, mul_one]
+
 /-- At `m = 0`, `ℰ_0(u) = 1` for all `u` (Definition 2.1). -/
 @[simp]
 theorem evalCentralFactorial_zero (u : ℚ) : evalCentralFactorial 0 u = 1 := rfl
@@ -255,6 +272,28 @@ theorem prop_2_2_binomial_identity (m r : ℕ) (hm : 1 ≤ m) :
   have h_fac_ne : ((2 * m).factorial : ℚ) ≠ 0 := by
     exact_mod_cast Nat.factorial_ne_zero (2 * m)
   rw [div_mul_eq_mul_div, h_prod, mul_div_cancel_left₀ _ h_fac_ne]
+
+/-- **Proposition 2.2 (Equation (2.3) for All `r ∈ ℤ`)**:
+For every integer `r ∈ ℤ` (positive, negative, or zero) and every `m ≥ 1`, since `r² = |r|²`,
+$$\mathcal{E}_m(r^2) = \binom{|r|+m}{2m} + \binom{|r|+m-1}{2m} \in \mathbb{Z}.$$ -/
+theorem prop_2_2_binomial_identity_int (m : ℕ) (r : ℤ) (hm : 1 ≤ m) :
+    evalCentralFactorial m ((r : ℚ) ^ 2) =
+      ((Nat.choose (r.natAbs + m) (2 * m) + Nat.choose (r.natAbs + m - 1) (2 * m) : ℕ) : ℚ) := by
+  have h_sq : (r : ℚ) ^ 2 = (r.natAbs : ℚ) ^ 2 := by
+    rcases Int.natAbs_eq r with h | h
+    · conv_lhs => rw [h, Int.cast_natCast]
+    · conv_lhs => rw [h, Int.cast_neg, Int.cast_natCast]
+      ring
+  rw [h_sq, prop_2_2_binomial_identity m r.natAbs hm]
+
+/-- **Proposition 2.2 (Integer-Square Integrality `ℰ_m(r²) ∈ ℤ` for All `m ∈ ℕ, r ∈ ℤ`)**: -/
+theorem prop_2_2_eval_sq_int (m : ℕ) (r : ℤ) :
+    ∃ z : ℤ, evalCentralFactorial m ((r : ℚ) ^ 2) = (z : ℚ) := by
+  rcases eq_or_ne m 0 with rfl | hm0
+  · exact ⟨1, by simp⟩
+  · refine ⟨(Nat.choose (r.natAbs + m) (2 * m) + Nat.choose (r.natAbs + m - 1) (2 * m) : ℕ), ?_⟩
+    rw [prop_2_2_binomial_identity_int m r (Nat.one_le_iff_ne_zero.mpr hm0)]
+    norm_cast
 
 /-- **Proposition 2.2(i) (Diagonal Normalization `ℰ_m(m²) = 1`)**:
 For every integer `m ≥ 0`, `ℰ_m(m²) = 1`. -/
@@ -751,6 +790,110 @@ theorem prop_2_4_harmonic_telescoping (m r : ℕ) (hr : r < m) :
             ring
           linear_combination h_diff_id
         rw [h_lhs_step, h_rhs_step, ih]
+
+/-- **Proposition 2.4 (Equation (2.11): Explicit `1/m + O(m⁻²)` Asymptotic Error Bound for `T(m, r)`)**:
+For every `1 ≤ r < m`, the harmonic block sum `T(m, r) - 1/(4r²) = (1/(2r)) ∑_{u=m-r}^{m+r-1} 1/u`
+satisfies the two-sided enclosure
+$$\frac{1}{m + r} \le T(m, r) - \frac{1}{4r^2} \le \frac{1}{m - r},$$
+and hence the explicit rational `O(m⁻²)` remainder bound
+$$\left| T(m, r) - \frac{1}{4r^2} - \frac{1}{m} \right| \le \frac{r}{m(m - r)}.$$ -/
+theorem prop_2_4_asymptotic (m r : ℕ) (hr1 : 1 ≤ r) (hr : r < m) :
+    (1 : ℚ) / ((m + r : ℕ) : ℚ) ≤ harmonicTelescopingSum m r - (1 : ℚ) / (4 * (r : ℚ) ^ 2) ∧
+    harmonicTelescopingSum m r - (1 : ℚ) / (4 * (r : ℚ) ^ 2) ≤ (1 : ℚ) / ((m - r : ℕ) : ℚ) ∧
+    |harmonicTelescopingSum m r - (1 : ℚ) / (4 * (r : ℚ) ^ 2) - (1 : ℚ) / (m : ℚ)| ≤
+      (r : ℚ) / ((m : ℚ) * ((m - r : ℕ) : ℚ)) := by
+  have hr0 : r ≠ 0 := by omega
+  have h_tele := prop_2_4_harmonic_telescoping m r hr
+  unfold harmonicTelescopingClosed at h_tele
+  rw [if_neg hr0] at h_tele
+  have h_diff :
+      harmonicTelescopingSum m r - (1 : ℚ) / (4 * (r : ℚ) ^ 2) =
+        ((1 : ℚ) / (2 * (r : ℚ))) * ∑ u ∈ Finset.Ico (m - r) (m + r), (1 : ℚ) / (u : ℚ) := by
+    rw [h_tele]
+    ring
+  have h_card : (Finset.Ico (m - r) (m + r)).card = 2 * r := by
+    rw [Nat.card_Ico]; omega
+  have h2r_pos : (0 : ℚ) < 2 * (r : ℚ) := by positivity
+  have h2r_ne : (2 * (r : ℚ)) ≠ 0 := ne_of_gt h2r_pos
+  have hmr_pos : (0 : ℚ) < ((m - r : ℕ) : ℚ) := by
+    exact_mod_cast (by omega : 0 < m - r)
+  have hpr_pos : (0 : ℚ) < ((m + r : ℕ) : ℚ) := by
+    exact_mod_cast (by omega : 0 < m + r)
+  have hm_pos : (0 : ℚ) < (m : ℚ) := by
+    exact_mod_cast (by omega : 0 < m)
+  have h_sum_low :
+      (2 * (r : ℚ)) * ((1 : ℚ) / ((m + r : ℕ) : ℚ)) ≤
+        ∑ u ∈ Finset.Ico (m - r) (m + r), (1 : ℚ) / (u : ℚ) := by
+    have h_le :
+        (∑ _u ∈ Finset.Ico (m - r) (m + r), (1 : ℚ) / ((m + r : ℕ) : ℚ)) ≤
+          ∑ u ∈ Finset.Ico (m - r) (m + r), (1 : ℚ) / (u : ℚ) := by
+      apply Finset.sum_le_sum
+      intro u hu
+      have hu1 : m - r ≤ u := (Finset.mem_Ico.mp hu).1
+      have hu2 : u < m + r := (Finset.mem_Ico.mp hu).2
+      have hu_pos : (0 : ℚ) < (u : ℚ) := by exact_mod_cast (by omega : 0 < u)
+      exact one_div_le_one_div_of_le hu_pos (by exact_mod_cast (le_of_lt hu2))
+    rw [Finset.sum_const, h_card, nsmul_eq_mul, Nat.cast_mul, Nat.cast_ofNat] at h_le
+    exact h_le
+  have h_sum_high :
+      (∑ u ∈ Finset.Ico (m - r) (m + r), (1 : ℚ) / (u : ℚ)) ≤
+        (2 * (r : ℚ)) * ((1 : ℚ) / ((m - r : ℕ) : ℚ)) := by
+    have h_le :
+        (∑ u ∈ Finset.Ico (m - r) (m + r), (1 : ℚ) / (u : ℚ)) ≤
+          ∑ _u ∈ Finset.Ico (m - r) (m + r), (1 : ℚ) / ((m - r : ℕ) : ℚ) := by
+      apply Finset.sum_le_sum
+      intro u hu
+      have hu1 : m - r ≤ u := (Finset.mem_Ico.mp hu).1
+      exact one_div_le_one_div_of_le hmr_pos (by exact_mod_cast hu1)
+    rw [Finset.sum_const, h_card, nsmul_eq_mul, Nat.cast_mul, Nat.cast_ofNat] at h_le
+    exact h_le
+  have h_low :
+      (1 : ℚ) / ((m + r : ℕ) : ℚ) ≤ harmonicTelescopingSum m r - (1 : ℚ) / (4 * (r : ℚ) ^ 2) := by
+    rw [h_diff]
+    calc (1 : ℚ) / ((m + r : ℕ) : ℚ)
+        = ((1 : ℚ) / (2 * (r : ℚ))) * ((2 * (r : ℚ)) * ((1 : ℚ) / ((m + r : ℕ) : ℚ))) := by
+          field_simp [h2r_ne]
+      _ ≤ ((1 : ℚ) / (2 * (r : ℚ))) * ∑ u ∈ Finset.Ico (m - r) (m + r), (1 : ℚ) / (u : ℚ) := by
+          exact mul_le_mul_of_nonneg_left h_sum_low (by positivity)
+  have h_high :
+      harmonicTelescopingSum m r - (1 : ℚ) / (4 * (r : ℚ) ^ 2) ≤ (1 : ℚ) / ((m - r : ℕ) : ℚ) := by
+    rw [h_diff]
+    calc ((1 : ℚ) / (2 * (r : ℚ))) * ∑ u ∈ Finset.Ico (m - r) (m + r), (1 : ℚ) / (u : ℚ)
+        ≤ ((1 : ℚ) / (2 * (r : ℚ))) * ((2 * (r : ℚ)) * ((1 : ℚ) / ((m - r : ℕ) : ℚ))) := by
+          exact mul_le_mul_of_nonneg_left h_sum_high (by positivity)
+      _ = (1 : ℚ) / ((m - r : ℕ) : ℚ) := by
+          field_simp [h2r_ne]
+  refine ⟨h_low, h_high, abs_le.mpr ⟨?_, ?_⟩⟩
+  · have h_sub_cast : ((m - r : ℕ) : ℚ) = (m : ℚ) - (r : ℚ) := Nat.cast_sub (le_of_lt hr)
+    have h_add_cast : ((m + r : ℕ) : ℚ) = (m : ℚ) + (r : ℚ) := by push_cast; rfl
+    have h_id1 :
+        (1 : ℚ) / ((m + r : ℕ) : ℚ) - (1 : ℚ) / (m : ℚ) =
+          -((r : ℚ) / ((m : ℚ) * ((m + r : ℕ) : ℚ))) := by
+      have hm_ne : (m : ℚ) ≠ 0 := ne_of_gt hm_pos
+      have hpr_ne : ((m + r : ℕ) : ℚ) ≠ 0 := ne_of_gt hpr_pos
+      rw [div_sub_div _ _ hpr_ne hm_ne]
+      conv_lhs => enter [1]; rw [h_add_cast]
+      ring
+    have h_denom_le :
+        (m : ℚ) * ((m - r : ℕ) : ℚ) ≤ (m : ℚ) * ((m + r : ℕ) : ℚ) := by
+      apply mul_le_mul_of_nonneg_left _ (le_of_lt hm_pos)
+      exact_mod_cast (by omega : m - r ≤ m + r)
+    have h_frac_le :
+        (r : ℚ) / ((m : ℚ) * ((m + r : ℕ) : ℚ)) ≤
+          (r : ℚ) / ((m : ℚ) * ((m - r : ℕ) : ℚ)) := by
+      have h_one_div := one_div_le_one_div_of_le (mul_pos hm_pos hmr_pos) h_denom_le
+      simpa [div_eq_mul_inv] using mul_le_mul_of_nonneg_left h_one_div (Nat.cast_nonneg r)
+    linarith
+  · have h_sub_cast : ((m - r : ℕ) : ℚ) = (m : ℚ) - (r : ℚ) := Nat.cast_sub (le_of_lt hr)
+    have h_id2 :
+        (1 : ℚ) / ((m - r : ℕ) : ℚ) - (1 : ℚ) / (m : ℚ) =
+          (r : ℚ) / ((m : ℚ) * ((m - r : ℕ) : ℚ)) := by
+      have hm_ne : (m : ℚ) ≠ 0 := ne_of_gt hm_pos
+      have hmr_ne : ((m - r : ℕ) : ℚ) ≠ 0 := ne_of_gt hmr_pos
+      field_simp [hm_ne, hmr_ne]
+      rw [h_sub_cast]
+      ring
+    linarith
 
 /-- Logarithmic derivative evaluation for a product of linear factors `∏ t ∈ s, (X - C (f t))`
 at a point `u` where no factor vanishes. -/
@@ -1376,6 +1519,54 @@ theorem theorem_2_5_linear_shift_product (m : ℕ) (hm : 1 ≤ m) (r : ℤ) (w :
   intro t _
   ring
 
+/-- **Theorem 2.5 (Equation (2.20): Degree-`2m` Linear-`w` Factorization on the Root Window `0 ≤ r < m`)**:
+For every `0 ≤ r < m` and `w ∈ ℚ`, expanding `\mathcal{E}_m((w + r)^2)` via `v = w(2r + w)`
+splits every quadratic factor `1 + w(2r + w)/(r² - t²)` into two linear factors in `w`:
+$$\mathcal{E}_m((w + r)^2) = w(2r + w)\mathcal{E}_m'(r^2) \prod_{\substack{0 \le t < m \\ t \ne r}}
+  \left(1 + \frac{w}{r - t}\right)\left(1 + \frac{w}{r + t}\right).$$ -/
+theorem theorem_2_5_eq_2_20_linear_w_factorization (m r : ℕ) (hr : r < m) (w : ℚ) :
+    evalCentralFactorial m ((w + (r : ℚ)) ^ 2) =
+      w * (2 * (r : ℚ) + w) * EPrimeForm1 m r *
+        ∏ t ∈ (Finset.range m).erase r,
+          ((1 + w / ((r : ℚ) - (t : ℚ))) * (1 + w / ((r : ℚ) + (t : ℚ)))) := by
+  let v : ℚ := w * (2 * (r : ℚ) + w)
+  have h_vr : (w + (r : ℚ)) ^ 2 = v + (r : ℚ) ^ 2 := by
+    dsimp [v]; ring
+  have h_eval := congrArg (Polynomial.eval v) (theorem_2_5_taylor_shift_factorization m r hr)
+  simp only [Polynomial.eval_comp, Polynomial.eval_add, Polynomial.eval_X,
+    Polynomial.eval_C, Polynomial.eval_mul, Polynomial.eval_prod, Polynomial.eval_one,
+    eval_centralFactorialPoly] at h_eval
+  rw [h_vr, h_eval]
+  have h_prod_eq :
+      (∏ t ∈ (Finset.range m).erase r, (1 + 1 / ((r : ℚ) ^ 2 - (t : ℚ) ^ 2) * v)) =
+        ∏ t ∈ (Finset.range m).erase r,
+          ((1 + w / ((r : ℚ) - (t : ℚ))) * (1 + w / ((r : ℚ) + (t : ℚ)))) := by
+    apply Finset.prod_congr rfl
+    intro t ht
+    have ht_ne : t ≠ r := (Finset.mem_erase.mp ht).1
+    have h_sub_ne : (r : ℚ) - (t : ℚ) ≠ 0 := by
+      intro h_eq
+      exact ht_ne (by exact_mod_cast (sub_eq_zero.mp h_eq).symm)
+    have h_add_ne : (r : ℚ) + (t : ℚ) ≠ 0 := by
+      intro h_eq
+      have h_nonneg_r : (0 : ℚ) ≤ (r : ℚ) := Nat.cast_nonneg r
+      have h_nonneg_t : (0 : ℚ) ≤ (t : ℚ) := Nat.cast_nonneg t
+      have hr0 : (r : ℚ) = 0 := by linarith
+      have ht0 : (t : ℚ) = 0 := by linarith
+      have hr_nat : r = 0 := by exact_mod_cast hr0
+      have ht_nat : t = 0 := by exact_mod_cast ht0
+      exact ht_ne (ht_nat.trans hr_nat.symm)
+    have h_sq_ne : (r : ℚ) ^ 2 - (t : ℚ) ^ 2 ≠ 0 := by
+      have : (r : ℚ) ^ 2 - (t : ℚ) ^ 2 = ((r : ℚ) - (t : ℚ)) * ((r : ℚ) + (t : ℚ)) := by ring
+      rw [this]
+      exact mul_ne_zero h_sub_ne h_add_ne
+    dsimp [v]
+    field_simp [h_sub_ne, h_add_ne, h_sq_ne]
+    ring
+  rw [h_prod_eq]
+  dsimp [v]
+  ring
+
 open Polynomial
 
 /-- The falling-factorial polynomial `∏_{j=0}^{k-1} (X - j)` in `Polynomial ℚ`. -/
@@ -1456,7 +1647,7 @@ theorem binomPoly_eq_C_mul_X_mul_prod (k : ℕ) (hk : 1 ≤ k) :
       apply Finset.prod_congr rfl
       intro j _
       congr 2
-      ring
+      ring_nf
     rw [h_lhs, ← h_rhs]
     exact prod_X_add_C_eq_prod_C_mul_prod_one_add (Finset.Ico 1 k) (fun j => -(j : ℚ))
       (fun j hj => by

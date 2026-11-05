@@ -102,7 +102,7 @@ theorem prop_5_2_block_row_elimination_det {R N : ℕ} {K : Type*} [CommRing K]
         Matrix.fromBlocks (1 : Matrix (Fin R) (Fin R) K) 0 (-Z) (1 : Matrix (Fin N) (Fin N) K) *
           Matrix.fromBlocks L1 L2 B1 B2 := by
     rw [Matrix.fromBlocks_multiply]
-    simp [sub_eq_add_neg]
+    simp [sub_eq_add_neg, add_comm]
   rw [h_mul, Matrix.det_mul, Matrix.det_fromBlocks_zero₁₂, Matrix.det_one, Matrix.det_one,
       mul_one, one_mul]
 
@@ -128,7 +128,7 @@ theorem theorem_5_3_i_schur_complement_det {R N : ℕ} {K : Type*} [CommRing K]
         Matrix.fromBlocks (1 : Matrix (Fin R) (Fin R) K) (-Γ) 0 (1 : Matrix (Fin N) (Fin N) K) =
       Matrix.fromBlocks L_tail 0 B_tail (B_head - B_tail * Γ) := by
     rw [Matrix.fromBlocks_multiply]
-    simp [h_cancel, sub_eq_add_neg]
+    simp [h_cancel, sub_eq_add_neg, add_comm]
   have h_det := congrArg Matrix.det h_block
   rw [Matrix.det_mul, Matrix.det_fromBlocks_zero₂₁, Matrix.det_one, Matrix.det_one,
       mul_one, mul_one, Matrix.det_fromBlocks_zero₁₂] at h_det
@@ -193,8 +193,8 @@ theorem theorem_5_3_ii_Qd_inner_node_eval (A0K R : ℕ)
         (Polynomial.C (Γ m d) * centralFactorialPoly (A0K + 1 + m.val)).eval ((r : ℚ) ^ 2)) = 0 := by
     apply Finset.sum_eq_zero
     intro m _
-    rw [Polynomial.eval_mul, Polynomial.eval_C,
-        lemma_2_1_poly_vanishing (A0K + 1 + m.val) r (by omega), mul_zero]
+    rw [Polynomial.eval_mul, Polynomial.eval_C, eval_centralFactorialPoly,
+        (prop_2_2_i_vanishing (A0K + 1 + m.val) r (by omega)).1, mul_zero]
   rw [h_tail_zero, sub_zero]
 
 /-- **Theorem 5.3(ii) (Homogeneous Scalar Cancellation of `w_{2n+1,0}` in `Γ`)**:

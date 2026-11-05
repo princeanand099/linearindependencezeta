@@ -866,7 +866,8 @@ theorem lemma_3_1_total_pole_multiplicity (n A0K AK : ℕ) (hn : 1 ≤ n) (hA0 :
   have hI_card : I.card = 2 * A0K + 1 := by
     rw [hI_eq, Nat.card_Icc]
     omega
-  rw [Finset.sum_const, hI_card, smul_eq_mul]
+  rw [Finset.sum_const, hI_card, smul_eq_mul,
+      Nat.add_mul (2 * A0K) 1 (2 * n - 1), Nat.mul_right_comm 2 A0K (2 * n - 1)]
   omega
 
 /-- **Definition 3.1 (Equation (3.1): Rational Kernel Degree Margin `deg_z ℱ ≤ -(2n + 3) ≤ -5`)**:
@@ -1010,6 +1011,8 @@ theorem prod_Icc_outer_window_eq (A0K r : ℕ) (hr : A0K < r) :
     exact hc.symm
   have h_sub_fac : (r - A0K).factorial = (r - A0K) * (r - A0K - 1).factorial := by
     conv_lhs => rw [show r - A0K = (r - A0K - 1) + 1 by omega, Nat.factorial_succ]
+    congr 1
+    omega
   have h_rhs_fac :
       ((r + A0K).factorial : ℚ) =
         ((2 * A0K).factorial : ℚ) *
@@ -1140,21 +1143,26 @@ theorem lemma_3_2_eq_3_6_product_eq_closed (n A0K AK k : ℕ)
       have h_sgn_sq : ((-1 : ℚ) ^ (A0K + AK - k)) * ((-1 : ℚ) ^ (A0K + AK - k)) = 1 := by
         rw [← pow_add, show (A0K + AK - k) + (A0K + AK - k) = 2 * (A0K + AK - k) by ring,
             pow_mul, neg_one_sq, one_pow]
-      rw [mul_pow, mul_pow, mul_pow, mul_pow, h_sign_pow]
-      field_simp [hs1_ne, hs2_ne, pow_ne_zero (A0K + AK - k) (by norm_num : (-1 : ℚ) ≠ 0)]
-      calc (Nat.choose (2 * A0K) (A0K + ((AK : ℤ) - (k : ℤ)).natAbs) : ℚ) ^ (2 * n - 1)
-          = 1 * (Nat.choose (2 * A0K) (A0K + ((AK : ℤ) - (k : ℤ)).natAbs) : ℚ) ^ (2 * n - 1) :=
-            (one_mul _).symm
+      have h_sgn_ne : ((-1 : ℚ) ^ (A0K + AK - k)) ≠ 0 :=
+        pow_ne_zero (A0K + AK - k) (by norm_num : (-1 : ℚ) ≠ 0)
+      rw [mul_pow, mul_pow, mul_pow, mul_pow, h_sign_pow,
+          div_eq_iff (mul_ne_zero (mul_ne_zero h_sgn_ne hs1_ne) hs2_ne)]
+      calc (Nat.choose (2 * A0K) (A0K + ((AK : ℤ) - (k : ℤ)).natAbs) : ℚ) ^ (2 * n - 1) *
+              (s.factorial : ℚ) ^ (2 * n - 1) * ((2 * A0K - s).factorial : ℚ) ^ (2 * n - 1)
+          = 1 * (Nat.choose (2 * A0K) (A0K + ((AK : ℤ) - (k : ℤ)).natAbs) : ℚ) ^ (2 * n - 1) *
+              (s.factorial : ℚ) ^ (2 * n - 1) * ((2 * A0K - s).factorial : ℚ) ^ (2 * n - 1) := by ring
         _ = ((-1 : ℚ) ^ (A0K + AK - k) * (-1 : ℚ) ^ (A0K + AK - k)) *
-              (Nat.choose (2 * A0K) (A0K + ((AK : ℤ) - (k : ℤ)).natAbs) : ℚ) ^ (2 * n - 1) := by
+              (Nat.choose (2 * A0K) (A0K + ((AK : ℤ) - (k : ℤ)).natAbs) : ℚ) ^ (2 * n - 1) *
+              (s.factorial : ℚ) ^ (2 * n - 1) * ((2 * A0K - s).factorial : ℚ) ^ (2 * n - 1) := by
             rw [h_sgn_sq]
         _ = (-1 : ℚ) ^ (A0K + AK - k) *
               (Nat.choose (2 * A0K) (A0K + ((AK : ℤ) - (k : ℤ)).natAbs) : ℚ) ^ (2 * n - 1) *
-              (-1 : ℚ) ^ (A0K + AK - k) := by ring
+              ((-1 : ℚ) ^ (A0K + AK - k) * (s.factorial : ℚ) ^ (2 * n - 1) *
+                ((2 * A0K - s).factorial : ℚ) ^ (2 * n - 1)) := by ring
     change ((((2 * AK).factorial : ℚ) ^ 2) * (((2 * A0K).factorial : ℚ) ^ (2 * n - 1))) /
         ((∏ j ∈ (Finset.range (2 * AK + 1)).erase k, ((j : ℚ) - (k : ℚ)) ^ 2) *
           (∏ j ∈ I.erase k, ((j : ℚ) - (k : ℚ)) ^ (2 * n - 1))) = _
-    rw [div_mul_div_comm, h_out_div, h_in_div]
+    rw [← div_mul_div_comm, h_out_div, h_in_div]
     ring
   · rw [if_neg h_in]
     have hr_gt : A0K < ((AK : ℤ) - (k : ℤ)).natAbs := not_le.mp h_in
@@ -1166,11 +1174,16 @@ theorem lemma_3_2_eq_3_6_product_eq_closed (n A0K AK k : ℕ)
     change ((((2 * AK).factorial : ℚ) ^ 2) * (((2 * A0K).factorial : ℚ) ^ (2 * n - 1))) /
         ((∏ j ∈ (Finset.range (2 * AK + 1)).erase k, ((j : ℚ) - (k : ℚ)) ^ 2) *
           (∏ j ∈ I.erase k, ((j : ℚ) - (k : ℚ)) ^ (2 * n - 1))) = _
-    rw [div_mul_div_comm, h_out_div, hI_erase, Finset.prod_pow]
+    rw [← div_mul_div_comm, h_out_div, hI_erase, Finset.prod_pow]
     let r_abs : ℕ := ((AK : ℤ) - (k : ℤ)).natAbs
     let outerBin : ℚ := ((r_abs - A0K : ℕ) : ℚ) * (Nat.choose (r_abs + A0K) (2 * A0K) : ℚ)
     have h_fac_ne : (((2 * A0K).factorial : ℚ) ^ (2 * n - 1)) ≠ 0 :=
       pow_ne_zero _ (by exact_mod_cast Nat.factorial_ne_zero (2 * A0K))
+    have h_cancel :
+        (((2 * A0K).factorial : ℚ) ^ (2 * n - 1)) /
+          ((((2 * A0K).factorial : ℚ) ^ (2 * n - 1)) * outerBin ^ (2 * n - 1)) =
+          1 / (outerBin ^ (2 * n - 1)) := by
+      simpa using mul_div_mul_left (1 : ℚ) (outerBin ^ (2 * n - 1)) h_fac_ne
     by_cases h_lt : k < AK
     · rw [if_pos h_lt]
       have h_prod_pos :
@@ -1196,7 +1209,7 @@ theorem lemma_3_2_eq_3_6_product_eq_closed (n A0K AK k : ℕ)
             have hk_le_j : k ≤ j := by omega
             rw [Nat.cast_sub hk_le_j]
         rw [h_bij, prod_Icc_outer_window_eq A0K r_abs hr_gt]
-      rw [h_prod_pos, mul_pow, mul_div_mul_left _ _ h_fac_ne]
+      rw [h_prod_pos, mul_pow, h_cancel]
       ring
     · rw [if_neg h_lt]
       have h_prod_neg :
@@ -1235,7 +1248,7 @@ theorem lemma_3_2_eq_3_6_product_eq_closed (n A0K AK k : ℕ)
         rw [h_bij, h_neg_factor, Finset.prod_const, h_card, h_odd_card.neg_one_pow,
             prod_Icc_outer_window_eq A0K r_abs hr_gt, neg_one_mul]
       have h_odd_exp : Odd (2 * n - 1) := ⟨n - 1, by omega⟩
-      rw [h_prod_neg, h_odd_exp.neg_pow, mul_pow, div_neg, mul_div_mul_left _ _ h_fac_ne]
+      rw [h_prod_neg, h_odd_exp.neg_pow, mul_pow, div_neg, h_cancel]
       ring
 
 /-- **Theorem 3.4 (Simple-Pole Harmonic Telescoping Identity, p. 18)**:
@@ -1312,7 +1325,7 @@ theorem harmonicNumber_one_diff_bound (M k : ℕ) (hM : 1 ≤ M) :
       exact one_div_le_one_div_of_le (by exact_mod_cast hM) (by exact_mod_cast hl_ge)
     have h_card : (Finset.Icc (M + 1) (M + k)).card = k := by
       rw [Nat.card_Icc]; omega
-    rw [Finset.sum_const, h_card, smul_eq_mul, mul_one_div] at h_le
+    rw [Finset.sum_const, h_card, nsmul_eq_mul, mul_one_div] at h_le
     exact h_le
 
 /-- **Theorem 3.4 (Equation (3.17): Factorization of Kernel Evaluation `ℱ(ν; P) = W_K(ν) P((ν+AK)²)`):**
@@ -1407,13 +1420,12 @@ theorem coeff_X_sq_sub_two_mul_pow (r : ℚ) (d q : ℕ) :
     have h_base :
         Polynomial.X ^ 2 - Polynomial.C (2 * r) * Polynomial.X =
           Polynomial.X * (Polynomial.X + Polynomial.C (-2 * r)) := by
-      rw [Polynomial.C_neg, Polynomial.C_mul]
+      rw [show (-2 * r : ℚ) = -(2 * r) by ring, Polynomial.C_neg]
       ring
     rw [h_base, mul_pow, add_pow, Finset.mul_sum]
     apply Finset.sum_congr rfl
     intro j _
-    rw [← Polynomial.C_pow, ← Polynomial.C_eq_natCast, ← Polynomial.C_mul,
-        ← Polynomial.C_mul]
+    rw [← Polynomial.C_pow, ← Polynomial.C_eq_natCast, Polynomial.C_mul]
     ring
   rw [h_poly_eq, Polynomial.finset_sum_coeff]
   simp only [Polynomial.coeff_C_mul, Polynomial.coeff_X_pow]
@@ -1469,15 +1481,13 @@ theorem lemma_3_2_poly_quadratic_shift_coeff (P : Polynomial ℚ) (r : ℚ) (q :
     rw [Polynomial.comp_assoc]
     congr 1
     simp only [Polynomial.add_comp, Polynomial.X_comp, Polynomial.C_comp]
-    rw [← Polynomial.C_pow, ← Polynomial.C_mul_X_pow_eq_monomial]
-    simp only [pow_one]
-    have h_2r : Polynomial.C (2 * r) = 2 * Polynomial.C r := by
-      rw [Polynomial.C_mul, Polynomial.C_ofNat]
-    rw [h_2r]
+    rw [Polynomial.C_pow, Polynomial.C_mul, map_ofNat Polynomial.C 2]
     ring
   let M : ℕ := max (Q.natDegree + 1) (q + 1)
   have hQ_sum : Q = ∑ d ∈ Finset.range M, Polynomial.C (Q.coeff d) * Polynomial.X ^ d := by
-    rw [Polynomial.as_sum_range' Q M (le_max_left _ _)]
+    conv_lhs =>
+      rw [Polynomial.as_sum_range' Q M
+        (lt_of_lt_of_le (Nat.lt_succ_self Q.natDegree) (le_max_left _ _))]
     apply Finset.sum_congr rfl
     intro d _
     rw [Polynomial.C_mul_X_pow_eq_monomial]
@@ -1495,8 +1505,13 @@ theorem lemma_3_2_poly_quadratic_shift_coeff (P : Polynomial ℚ) (r : ℚ) (q :
           else 0 := by
     intro d _
     dsimp [U]
-    rw [coeff_X_sq_sub_two_mul_pow r d q, Finset.mem_Icc]
-    split_ifs <;> ring
+    rw [coeff_X_sq_sub_two_mul_pow r d q]
+    by_cases hd : (q + 1) / 2 ≤ d ∧ d ≤ q
+    · have hd_mem : d ∈ Finset.Icc ((q + 1) / 2) q := Finset.mem_Icc.mpr hd
+      rw [if_pos hd, if_pos hd_mem]
+      ring
+    · have hd_mem : d ∉ Finset.Icc ((q + 1) / 2) q := fun h => hd (Finset.mem_Icc.mp h)
+      rw [if_neg hd, if_neg hd_mem, mul_zero]
   rw [Finset.sum_congr rfl h_term, ← Finset.sum_filter]
   have h_filter_eq :
       (Finset.range M).filter (fun d => d ∈ Finset.Icc ((q + 1) / 2) q) =
@@ -1508,4 +1523,444 @@ theorem lemma_3_2_poly_quadratic_shift_coeff (P : Polynomial ℚ) (r : ℚ) (q :
     omega
   rw [h_filter_eq, ← Finset.mul_sum]
 
+/-- **Lemma 3.2 (Outer-Pole Binomial Identity, cf. Equation (3.6) & (6.12))**:
+For any `A₀K < r`, the outer-window denominator factor satisfies
+$$(r - A_0 K) \binom{r + A_0 K}{2 A_0 K} = (2 A_0 K + 1) \binom{r + A_0 K}{2 A_0 K + 1}.$$ -/
+theorem lemma_3_2_outer_binomial_identity (A0K r : ℕ) (_hr : A0K < r) :
+    (r - A0K) * Nat.choose (r + A0K) (2 * A0K) =
+      (2 * A0K + 1) * Nat.choose (r + A0K) (2 * A0K + 1) := by
+  have h_step := Nat.choose_succ_right_eq (r + A0K) (2 * A0K)
+  rw [show r + A0K - 2 * A0K = r - A0K by omega] at h_step
+  linarith
+
+/-- **Lemma 3.2 (Expansion of `(X² + 2rX)^d` and Extraction of `[X^q] (X² + 2rX)^d`)**:
+For any `r ∈ ℚ` and `d, q ∈ ℕ`, the coefficient of `X^q` in `(X² + 2rX)^d` equals
+`C(d, q - d) * (2r)^{2d - q}` when `(q + 1) / 2 ≤ d ≤ q`, and `0` otherwise. -/
+theorem coeff_X_sq_add_two_mul_pow (r : ℚ) (d q : ℕ) :
+    ((Polynomial.X ^ 2 + Polynomial.C (2 * r) * Polynomial.X) ^ d).coeff q =
+      if (q + 1) / 2 ≤ d ∧ d ≤ q then
+        (Nat.choose d (q - d) : ℚ) * ((2 * r) ^ (2 * d - q))
+      else 0 := by
+  have h_neg := coeff_X_sq_sub_two_mul_pow (-r) d q
+  have h_poly :
+      Polynomial.X ^ 2 - Polynomial.C (2 * (-r)) * Polynomial.X =
+        Polynomial.X ^ 2 + Polynomial.C (2 * r) * Polynomial.X := by
+    rw [show (2 * (-r) : ℚ) = -(2 * r) by ring, Polynomial.C_neg]
+    ring
+  rw [h_poly] at h_neg
+  rw [h_neg]
+  split_ifs with h_cond
+  · have hd1 : (q + 1) / 2 ≤ d := h_cond.1
+    rw [show 2 * (-r) = -(2 * r) by ring, neg_pow (2 * r) (2 * d - q)]
+    have h_par : ((-1 : ℚ) ^ q) * ((-1 : ℚ) ^ (2 * d - q)) = 1 := by
+      rw [← pow_add, show q + (2 * d - q) = 2 * d by omega, pow_mul, neg_one_sq, one_pow]
+    calc (-1 : ℚ) ^ q * (Nat.choose d (q - d) : ℚ) * ((-1 : ℚ) ^ (2 * d - q) * (2 * r) ^ (2 * d - q))
+        = ((-1 : ℚ) ^ q * (-1 : ℚ) ^ (2 * d - q)) *
+            ((Nat.choose d (q - d) : ℚ) * (2 * r) ^ (2 * d - q)) := by ring
+      _ = (Nat.choose d (q - d) : ℚ) * (2 * r) ^ (2 * d - q) := by rw [h_par, one_mul]
+  · rfl
+
+/-- **Lemma 3.2 (Quadratic Taylor Shift Formula for `[w^q] P((w + r)²)` in Equation (3.8), p. 15)**:
+For every polynomial `P ∈ ℚ[X]` and every `r ∈ ℚ` and `q ∈ ℕ`, expanding `P((X + r)²)` in powers
+of `X` yields:
+$$[X^q] P((X + r)^2) = \sum_{d = \lceil q/2 \rceil}^q
+  \binom{d}{q - d} (2r)^{2d - q} [Y^d] P(Y + r^2).$$ -/
+theorem lemma_3_2_poly_quadratic_add_shift_coeff (P : Polynomial ℚ) (r : ℚ) (q : ℕ) :
+    (P.comp ((Polynomial.X + Polynomial.C r) ^ 2)).coeff q =
+      ∑ d ∈ Finset.Icc ((q + 1) / 2) q,
+        (Nat.choose d (q - d) : ℚ) * ((2 * r) ^ (2 * d - q)) *
+          (P.comp (Polynomial.X + Polynomial.C (r ^ 2))).coeff d := by
+  have h_sub := lemma_3_2_poly_quadratic_shift_coeff P (-r) q
+  have h_comp :
+      (Polynomial.X - Polynomial.C (-r)) ^ 2 = (Polynomial.X + Polynomial.C r) ^ 2 := by
+    rw [Polynomial.C_neg, sub_neg_eq_add]
+  have h_r2 : (-r) ^ 2 = r ^ 2 := neg_sq r
+  rw [h_comp, h_r2] at h_sub
+  rw [h_sub, Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro d hd
+  have hd1 : (q + 1) / 2 ≤ d := (Finset.mem_Icc.mp hd).1
+  rw [show 2 * (-r) = -(2 * r) by ring, neg_pow (2 * r) (2 * d - q)]
+  have h_par : ((-1 : ℚ) ^ q) * ((-1 : ℚ) ^ (2 * d - q)) = 1 := by
+    rw [← pow_add, show q + (2 * d - q) = 2 * d by omega, pow_mul, neg_one_sq, one_pow]
+  calc (-1 : ℚ) ^ q *
+        ((Nat.choose d (q - d) : ℚ) * ((-1 : ℚ) ^ (2 * d - q) * (2 * r) ^ (2 * d - q)) *
+          (P.comp (Polynomial.X + Polynomial.C (r ^ 2))).coeff d)
+      = ((-1 : ℚ) ^ q * (-1 : ℚ) ^ (2 * d - q)) *
+          ((Nat.choose d (q - d) : ℚ) * (2 * r) ^ (2 * d - q) *
+            (P.comp (Polynomial.X + Polynomial.C (r ^ 2))).coeff d) := by ring
+    _ = (Nat.choose d (q - d) : ℚ) * (2 * r) ^ (2 * d - q) *
+          (P.comp (Polynomial.X + Polynomial.C (r ^ 2))).coeff d := by rw [h_par, one_mul]
+
+/-- **Lemma 3.2 (Equation (3.8): Exact Polynomial Cauchy-Product Derivation of `A_{t,k}(P)`)**:
+For any polynomial `P ∈ ℚ[X]`, pole `k`, and pole order `1 ≤ t ≤ L_k` (with `r = AK - k`),
+let `G_k(X) := ∑_{m=0}^{L_k - t} g_{k,m} X^m` be the truncated Taylor polynomial of `g_k(w)`.
+Then the coefficient `[X^{L_k - t}] (G_k(X) * P((X + r)²))` in the Cauchy product of `g_k(w)`
+and `P((w + r)²)` equals `laurentCoeffAt n A0K AK (fun u d => (P.comp (X + C u)).coeff d) t k`. -/
+theorem lemma_3_2_laurentCoeffAt_eq_cauchy_coeff (n A0K AK : ℕ) (P : Polynomial ℚ)
+    (t k : ℕ) (ht1 : 1 ≤ t) (ht2 : t ≤ poleMultiplicity n A0K AK k) :
+    let Lk := poleMultiplicity n A0K AK k
+    let r : ℚ := (AK : ℚ) - (k : ℚ)
+    let GkPoly : Polynomial ℚ :=
+      ∑ m ∈ Finset.range (Lk - t + 1), Polynomial.C (gkTaylorCoeff n A0K AK k m) * Polynomial.X ^ m
+    (GkPoly * P.comp ((Polynomial.X + Polynomial.C r) ^ 2)).coeff (Lk - t) =
+      laurentCoeffAt n A0K AK (fun u d => (P.comp (Polynomial.X + Polynomial.C u)).coeff d) t k := by
+  intro Lk r GkPoly
+  unfold laurentCoeffAt
+  have h_not : ¬(t = 0 ∨ poleMultiplicity n A0K AK k < t) := by omega
+  rw [if_neg h_not]
+  dsimp [GkPoly]
+  rw [Finset.sum_mul, Polynomial.finset_sum_coeff]
+  have h_rev :=
+    (Finset.sum_range_reflect
+      (fun m =>
+        (Polynomial.C (gkTaylorCoeff n A0K AK k m) * Polynomial.X ^ m *
+          P.comp ((Polynomial.X + Polynomial.C r) ^ 2)).coeff (Lk - t))
+      (Lk - t + 1)).symm
+  rw [show Lk - t + 1 - 1 = Lk - t by omega] at h_rev
+  rw [h_rev]
+  apply Finset.sum_congr rfl
+  intro q hq
+  have hq_le : q ≤ Lk - t := Nat.lt_succ_iff.mp (Finset.mem_range.mp hq)
+  rw [mul_assoc, Polynomial.coeff_C_mul, Polynomial.X_pow_mul,
+      Polynomial.coeff_mul_X_pow', if_pos (by omega : Lk - t - q ≤ Lk - t),
+      show Lk - t - (Lk - t - q) = q by omega,
+      lemma_3_2_poly_quadratic_add_shift_coeff P r q]
+
+/-- **Theorem 3.3(i) (Equation (3.10): Algebraic Proof of `S_1(P) = 0` from Partial Fractions & Degree Bound)**:
+Let `L : ℕ → ℕ` be the pole multiplicities and `D := ∑_{k=0}^{2AK} L(k)` the total denominator degree.
+In the cleared partial fraction identity
+$$N(X) = \sum_{k=0}^{2AK} \sum_{t=1}^{L(k)} A_{t,k} (X + k)^{L(k) - t}
+  \prod_{\substack{0 \le j \le 2AK \\ j \ne k}} (X + j)^{L(j)},$$
+every `t = 1` term has a monic polynomial cofactor of degree `D - 1`, whereas every `t ≥ 2` term
+has degree `D - t ≤ D - 2 < D - 1`. Consequently, extracting the coefficient of `X^{D - 1}` gives
+`[X^{D - 1}] N(X) = ∑_{k=0}^{2AK} A_{1,k} = S_1(P)`. Whenever `N = 0` or `deg N + 2 ≤ D`
+(which holds for `ℱ(z; P)` by `lemma_3_1_degree_margin`), `S_1(P) = 0` identically. -/
+theorem theorem_3_3_i_simple_pole_sum_zero_from_degree (AK : ℕ) (L : ℕ → ℕ)
+    (hL_pos : ∀ k ∈ Finset.range (2 * AK + 1), 1 ≤ L k)
+    (At : ℕ → ℕ → ℚ) :
+    let D : ℕ := ∑ k ∈ Finset.range (2 * AK + 1), L k
+    let cofactorPoly (k t : ℕ) : Polynomial ℚ :=
+      (Polynomial.X + Polynomial.C (k : ℚ)) ^ (L k - t) *
+        ∏ j ∈ (Finset.range (2 * AK + 1)).erase k,
+          (Polynomial.X + Polynomial.C (j : ℚ)) ^ (L j)
+    let NPoly : Polynomial ℚ :=
+      ∑ k ∈ Finset.range (2 * AK + 1),
+        ∑ t ∈ Finset.Icc 1 (L k),
+          Polynomial.C (At t k) * cofactorPoly k t
+    NPoly.coeff (D - 1) = ∑ k ∈ Finset.range (2 * AK + 1), At 1 k ∧
+    ((NPoly = 0 ∨ NPoly.natDegree + 2 ≤ D) →
+      (∑ k ∈ Finset.range (2 * AK + 1), At 1 k) = 0) := by
+  intro D cofactorPoly NPoly
+  have hD_pos : 1 ≤ D := by
+    have h0_mem : 0 ∈ Finset.range (2 * AK + 1) := Finset.mem_range.mpr (by omega)
+    exact le_trans (hL_pos 0 h0_mem)
+      (Finset.single_le_sum (fun k _ => Nat.zero_le (L k)) h0_mem)
+  have h_cofactor_monic_deg :
+      ∀ k ∈ Finset.range (2 * AK + 1), ∀ t ∈ Finset.Icc 1 (L k),
+        (cofactorPoly k t).Monic ∧ (cofactorPoly k t).natDegree = D - t := by
+    intro k hk t ht
+    have ht1 : 1 ≤ t := (Finset.mem_Icc.mp ht).1
+    have ht2 : t ≤ L k := (Finset.mem_Icc.mp ht).2
+    dsimp [cofactorPoly]
+    have h_m1 : ((Polynomial.X + Polynomial.C (k : ℚ)) ^ (L k - t)).Monic :=
+      (Polynomial.monic_X_add_C (k : ℚ)).pow (L k - t)
+    have h_m2 :
+        (∏ j ∈ (Finset.range (2 * AK + 1)).erase k,
+          (Polynomial.X + Polynomial.C (j : ℚ)) ^ (L j)).Monic :=
+      Polynomial.monic_prod_of_monic _ _ (fun j _ => (Polynomial.monic_X_add_C _).pow _)
+    refine ⟨h_m1.mul h_m2, ?_⟩
+    rw [Polynomial.natDegree_mul h_m1.ne_zero h_m2.ne_zero,
+        Polynomial.natDegree_pow, Polynomial.natDegree_X_add_C, mul_one,
+        Polynomial.natDegree_prod_of_monic _ _ (fun j _ => (Polynomial.monic_X_add_C _).pow _)]
+    have h_deg_each :
+        ∀ j ∈ (Finset.range (2 * AK + 1)).erase k,
+          ((Polynomial.X + Polynomial.C (j : ℚ)) ^ (L j)).natDegree = L j := by
+      intro j _
+      rw [Polynomial.natDegree_pow, Polynomial.natDegree_X_add_C, mul_one]
+    rw [Finset.sum_congr rfl h_deg_each]
+    have h_sum_erase :
+        L k + ∑ j ∈ (Finset.range (2 * AK + 1)).erase k, L j = D :=
+      Finset.add_sum_erase (Finset.range (2 * AK + 1)) L hk
+    have h_add_sub :
+        L k - t + ∑ j ∈ (Finset.range (2 * AK + 1)).erase k, L j =
+          (L k + ∑ j ∈ (Finset.range (2 * AK + 1)).erase k, L j) - t :=
+      (Nat.sub_add_comm ht2).symm
+    rw [h_add_sub, h_sum_erase]
+  have h_coeff_eq : NPoly.coeff (D - 1) = ∑ k ∈ Finset.range (2 * AK + 1), At 1 k := by
+    dsimp [NPoly]
+    rw [Polynomial.finset_sum_coeff]
+    apply Finset.sum_congr rfl
+    intro k hk
+    rw [Polynomial.finset_sum_coeff, Finset.sum_eq_single 1]
+    · have h1_mem : 1 ∈ Finset.Icc 1 (L k) := Finset.mem_Icc.mpr ⟨le_rfl, hL_pos k hk⟩
+      have h_md := h_cofactor_monic_deg k hk 1 h1_mem
+      rw [Polynomial.coeff_C_mul, ← h_md.2, h_md.1.coeff_natDegree, mul_one]
+    · intro t ht ht_ne
+      have ht1 : 1 ≤ t := (Finset.mem_Icc.mp ht).1
+      have ht2 : t ≤ L k := (Finset.mem_Icc.mp ht).2
+      have hLk_le_D : L k ≤ D := Finset.single_le_sum (fun j _ => Nat.zero_le (L j)) hk
+      have h_md := h_cofactor_monic_deg k hk t ht
+      have h_lt_D1 : (cofactorPoly k t).natDegree < D - 1 := by
+        rw [h_md.2]
+        omega
+      rw [Polynomial.coeff_C_mul, Polynomial.coeff_eq_zero_of_natDegree_lt h_lt_D1, mul_zero]
+    · intro h_absurd
+      exact False.elim (h_absurd (Finset.mem_Icc.mpr ⟨le_rfl, hL_pos k hk⟩))
+  refine ⟨h_coeff_eq, ?_⟩
+  intro h_deg
+  rw [← h_coeff_eq]
+  rcases h_deg with h0 | h_lt
+  · rw [h0, Polynomial.coeff_zero]
+  · exact Polynomial.coeff_eq_zero_of_natDegree_lt (by omega)
+
+/-- **Theorem 3.4 (Equation (3.18): Simple-Pole Telescoping Limit as `M → ∞`)**:
+For any simple-pole residues `A₁ : ℕ → ℚ` satisfying `∑_{k=0}^{2AK} A₁(k) = S₁(P) = 0`,
+$$\lim_{M \to \infty} \sum_{k=0}^{2AK} A_1(k) \sum_{\nu=1}^M \frac{1}{\nu + k}
+  = -\sum_{k=0}^{2AK} A_1(k) H_k^{(1)}$$
+in `ℝ` (via `Filter.Tendsto` along `Filter.atTop`). -/
+theorem theorem_3_4_eq_3_18_simple_pole_limit (AK : ℕ) (A1 : ℕ → ℚ)
+    (hS1 : (∑ k ∈ Finset.range (2 * AK + 1), A1 k) = 0) :
+    Filter.Tendsto
+      (fun M : ℕ =>
+        ∑ k ∈ Finset.range (2 * AK + 1),
+          (A1 k : ℝ) * (∑ ν ∈ Finset.Icc 1 M, (1 : ℝ) / ((ν + k : ℕ) : ℝ)))
+      Filter.atTop
+      (nhds (- ∑ k ∈ Finset.range (2 * AK + 1), (A1 k : ℝ) * (harmonicNumber 1 k : ℝ))) := by
+  have h_diff_tendsto :
+      ∀ k ∈ Finset.range (2 * AK + 1),
+        Filter.Tendsto
+          (fun M : ℕ => (A1 k : ℝ) * ((harmonicNumber 1 (M + k) : ℝ) - (harmonicNumber 1 M : ℝ)))
+          Filter.atTop (nhds 0) := by
+    intro k _
+    rw [show (0 : ℝ) = (A1 k : ℝ) * 0 by ring]
+    apply Filter.Tendsto.const_mul
+    apply squeeze_zero' (g := fun M : ℕ => (k : ℝ) / (M : ℝ))
+    · filter_upwards [Filter.eventually_ge_atTop 1] with M hM
+      have hb : ((0 : ℚ) : ℝ) ≤ ((harmonicNumber 1 (M + k) - harmonicNumber 1 M : ℚ) : ℝ) :=
+        Rat.cast_mono (harmonicNumber_one_diff_bound M k hM).1
+      simpa using hb
+    · filter_upwards [Filter.eventually_ge_atTop 1] with M hM
+      have hb :
+          ((harmonicNumber 1 (M + k) - harmonicNumber 1 M : ℚ) : ℝ) ≤
+            (((k : ℚ) / (M : ℚ) : ℚ) : ℝ) :=
+        Rat.cast_mono (harmonicNumber_one_diff_bound M k hM).2
+      simpa using hb
+    · have h_inv : Filter.Tendsto (fun M : ℕ => (k : ℝ) * ((M : ℝ)⁻¹)) Filter.atTop (nhds ((k : ℝ) * 0)) :=
+        Filter.Tendsto.const_mul (k : ℝ)
+          (tendsto_inv_atTop_zero.comp tendsto_natCast_atTop_atTop)
+      rw [mul_zero] at h_inv
+      simpa [div_eq_mul_inv] using h_inv
+  have h_sum_tendsto :
+      Filter.Tendsto
+        (fun M : ℕ =>
+          (- ∑ k ∈ Finset.range (2 * AK + 1), (A1 k : ℝ) * (harmonicNumber 1 k : ℝ)) +
+            ∑ k ∈ Finset.range (2 * AK + 1),
+              (A1 k : ℝ) * ((harmonicNumber 1 (M + k) : ℝ) - (harmonicNumber 1 M : ℝ)))
+        Filter.atTop
+        (nhds ((- ∑ k ∈ Finset.range (2 * AK + 1), (A1 k : ℝ) * (harmonicNumber 1 k : ℝ)) +
+          ∑ _k ∈ Finset.range (2 * AK + 1), (0 : ℝ))) :=
+     tendsto_const_nhds.add (tendsto_finset_sum _ h_diff_tendsto)
+  simp only [Finset.sum_const_zero, add_zero] at h_sum_tendsto
+  apply h_sum_tendsto.congr'
+  filter_upwards [Filter.eventually_ge_atTop 1] with M _hM
+  have h_tel := congr_arg ((↑) : ℚ → ℝ) (theorem_3_4_simple_pole_telescoping AK M A1 hS1)
+  push_cast at h_tel
+  simp only [Nat.cast_add]
+  exact h_tel.symm
+
+/-- **Theorem 3.4 (Equation (3.19): Higher-Order Pole Partial-Sum Convergence as `M → ∞`)**:
+For every pole location `k ≥ 0` and every pole order `t ≥ 2`,
+$$\lim_{M \to \infty} \sum_{\nu=1}^M \frac{1}{(\nu + k)^t} = \zeta(t) - H_k^{(t)}.$$ -/
+theorem theorem_3_4_eq_3_19_higher_pole_limit (t k : ℕ) (ht : 2 ≤ t) :
+    Filter.Tendsto
+      (fun M : ℕ => ∑ ν ∈ Finset.Icc 1 M, (1 : ℝ) / (((ν + k : ℕ) : ℝ) ^ t))
+      Filter.atTop
+      (nhds (riemannZetaReal t - (harmonicNumber t k : ℝ))) := by
+  have h_summable : Summable (fun m : ℕ => (1 : ℝ) / ((m : ℝ) + 1) ^ t) :=
+    summable_riemannZetaReal ht
+  have h_shift_summable :
+      Summable (fun i : ℕ => (1 : ℝ) / (((i + 1 + k : ℕ) : ℝ) ^ t)) := by
+    have hs := (summable_nat_add_iff k).mpr h_summable
+    exact hs.congr (fun i => by congr 2; push_cast; ring)
+  have h_tendsto := h_shift_summable.hasSum.tendsto_sum_nat
+  rw [tsum_shifted_inv_pow_eq_zeta_sub_harmonic t k ht] at h_tendsto
+  apply h_tendsto.congr
+  intro M
+  apply Finset.sum_bij (fun i _ => i + 1)
+  · intro i hi
+    simp only [Finset.mem_range] at hi
+    simp only [Finset.mem_Icc]
+    omega
+  · intro i₁ _ i₂ _ h_eq
+    omega
+  · intro ν hν
+    simp only [Finset.mem_Icc] at hν
+    exact ⟨ν - 1, Finset.mem_range.mpr (by omega), by omega⟩
+  · intro i _
+    rfl
+
+/-- **Theorem 3.4 (Equations (3.16)–(3.19): Full Partial-Sum Limit of the Moment Series as `M → ∞`)**:
+For every `n ≥ 1`, `A₀K, AK ∈ ℕ`, and Laurent coefficients `At : ℕ → ℕ → ℚ` satisfying
+`S₁ = 0` and `S_{2j} = 0` (`1 ≤ j ≤ n`), the truncated partial sums over `1 ≤ ν ≤ M` of the
+simple-pole and higher-order pole partial fractions converge as `M → ∞` to the odd-zeta linear form
+`∑_{j=1}^n S_{2j+1}(P) ζ(2j+1) + ℛ₀(P)` (Equation 3.16). -/
+theorem theorem_3_4_eq_3_16_full_series_limit (n A0K AK : ℕ) (At : ℕ → ℕ → ℚ)
+    (hS1 : (∑ k ∈ Finset.range (2 * AK + 1), At 1 k) = 0)
+    (h_even_zero : ∀ j : Fin n, poleSumSt n A0K AK At (2 * (j.val + 1)) = 0)
+    (h_outer_vanish : ∀ k ∈ Finset.range (2 * AK + 1),
+      ∀ t ∈ Finset.Icc (poleMultiplicity n A0K AK k + 1) (2 * n + 1), At t k = 0) :
+    Filter.Tendsto
+      (fun M : ℕ =>
+        (∑ j : Fin n,
+          ((∑ k ∈ Finset.range (2 * AK + 1),
+              (At (2 * (j.val + 1)) k : ℝ) *
+                (∑ ν ∈ Finset.Icc 1 M, (1 : ℝ) / (((ν + k : ℕ) : ℝ) ^ (2 * (j.val + 1))))) +
+           (∑ k ∈ Finset.range (2 * AK + 1),
+              (At (2 * (j.val + 1) + 1) k : ℝ) *
+                (∑ ν ∈ Finset.Icc 1 M, (1 : ℝ) / (((ν + k : ℕ) : ℝ) ^ (2 * (j.val + 1) + 1)))))) +
+        (∑ k ∈ Finset.range (2 * AK + 1),
+          (At 1 k : ℝ) * (∑ ν ∈ Finset.Icc 1 M, (1 : ℝ) / ((ν + k : ℕ) : ℝ))))
+      Filter.atTop
+      (nhds (oddZetaLinearForm n (fun j => poleSumSt n A0K AK At (2 * (j.val + 1) + 1))
+        (- ∑ k ∈ Finset.range (2 * AK + 1),
+            ((At 1 k * harmonicNumber 1 k) +
+              ∑ j : Fin n,
+                (At (2 * (j.val + 1)) k * harmonicNumber (2 * (j.val + 1)) k +
+                 At (2 * (j.val + 1) + 1) k * harmonicNumber (2 * (j.val + 1) + 1) k))))) := by
+  have h_higher_j :
+      ∀ j : Fin n,
+        Filter.Tendsto
+          (fun M : ℕ =>
+            (∑ k ∈ Finset.range (2 * AK + 1),
+              (At (2 * (j.val + 1)) k : ℝ) *
+                (∑ ν ∈ Finset.Icc 1 M, (1 : ℝ) / (((ν + k : ℕ) : ℝ) ^ (2 * (j.val + 1))))) +
+            (∑ k ∈ Finset.range (2 * AK + 1),
+              (At (2 * (j.val + 1) + 1) k : ℝ) *
+                (∑ ν ∈ Finset.Icc 1 M, (1 : ℝ) / (((ν + k : ℕ) : ℝ) ^ (2 * (j.val + 1) + 1)))))
+          Filter.atTop
+          (nhds
+            ((∑ k ∈ Finset.range (2 * AK + 1),
+              (At (2 * (j.val + 1)) k : ℝ) *
+                (riemannZetaReal (2 * (j.val + 1)) - (harmonicNumber (2 * (j.val + 1)) k : ℝ))) +
+             (∑ k ∈ Finset.range (2 * AK + 1),
+              (At (2 * (j.val + 1) + 1) k : ℝ) *
+                (riemannZetaReal (2 * (j.val + 1) + 1) - (harmonicNumber (2 * (j.val + 1) + 1) k : ℝ))))) := by
+    intro j
+    apply Filter.Tendsto.add
+    · exact tendsto_finset_sum _ (fun k _ =>
+        Filter.Tendsto.const_mul _ (theorem_3_4_eq_3_19_higher_pole_limit (2 * (j.val + 1)) k (by omega)))
+    · exact tendsto_finset_sum _ (fun k _ =>
+        Filter.Tendsto.const_mul _ (theorem_3_4_eq_3_19_higher_pole_limit (2 * (j.val + 1) + 1) k (by omega)))
+  have h_comb :=
+    (tendsto_finset_sum (Finset.univ : Finset (Fin n)) (fun j _ => h_higher_j j)).add
+      (theorem_3_4_eq_3_18_simple_pole_limit AK (fun k => At 1 k) hS1)
+  rw [← sub_eq_add_neg,
+      theorem_3_4_moment_decomposition n A0K AK At h_even_zero h_outer_vanish] at h_comb
+  exact h_comb
+
+/-- **Theorem 3.5(ii) (Equation (3.21): Zero-Buffered Positive Discrete Weights `W_{K,B}(ν)`)**:
+$$W_{K,B}(\nu) := W_K(\nu) \binom{\nu - 1}{BK}^{M_0} \binom{\nu + 2AK + BK}{BK}^{M_0}.$$ -/
+def WKBWeight (n A0K AK BK M0 ν : ℕ) : ℚ :=
+  WKWeight n A0K AK ν *
+    ((Nat.choose (ν - 1) BK : ℚ) ^ M0) *
+    ((Nat.choose (ν + 2 * AK + BK) BK : ℚ) ^ M0)
+
+/-- **Theorem 3.5(ii) (Equation (3.21): Identity `W_{K,B}(ν) = W_K(ν) Ω_B((ν+AK)²)^{M_0}` and Positivity)**:
+For every `ν ≥ BK + 1`, `W_{K,B}(ν) = W_K(ν) Ω_B((ν + AK)²)^{M_0}` and `0 < W_{K,B}(ν)`. -/
+theorem theorem_3_5_ii_WKBWeight_eq_and_pos (n A0K AK BK M0 ν : ℕ) (hν : BK + 1 ≤ ν) :
+    WKBWeight n A0K AK BK M0 ν =
+      WKWeight n A0K AK ν * (OmegaB AK BK (((ν + AK : ℕ) : ℚ) ^ 2)) ^ M0 ∧
+    0 < WKBWeight n A0K AK BK M0 ν := by
+  have h_eq :
+      WKBWeight n A0K AK BK M0 ν =
+        WKWeight n A0K AK ν * (OmegaB AK BK (((ν + AK : ℕ) : ℚ) ^ 2)) ^ M0 := by
+    unfold WKBWeight
+    rw [theorem_3_5_binomial_identity AK BK ν (by omega : 1 ≤ ν)]
+    ring
+  refine ⟨h_eq, ?_⟩
+  rw [h_eq]
+  exact mul_pos
+    (theorem_3_4_WKWeight_pos n A0K AK ν (by omega))
+    (pow_pos (theorem_3_5_ii_pos_beyond_buffer AK BK ν hν) M0)
+
+/-- **Theorem 3.5(iii) (Equation (3.22): Local Pole-Shift Factorization of `Ω_B((w + r)²)`):**
+For every pole `0 ≤ k ≤ 2AK` with `r = AK - k` and every `w ∈ ℚ`,
+$$\Omega_B((w + r)^2) = (-1)^{BK} \binom{k + BK}{BK} \binom{2AK - k + BK}{BK}
+  \prod_{j=1}^{BK} \left(1 - \frac{w}{k + j}\right) \left(1 + \frac{w}{2AK - k + j}\right).$$ -/
+theorem theorem_3_5_iii_pole_shift_factorization (AK BK k : ℕ) (hk : k ≤ 2 * AK) (w : ℚ) :
+    let r : ℚ := (AK : ℚ) - (k : ℚ)
+    OmegaB AK BK ((w + r) ^ 2) =
+      ((-1 : ℚ) ^ BK) *
+        (Nat.choose (k + BK) BK : ℚ) *
+        (Nat.choose (2 * AK - k + BK) BK : ℚ) *
+        ∏ j ∈ Finset.Icc 1 BK,
+          (1 - w / ((k + j : ℕ) : ℚ)) * (1 + w / ((2 * AK - k + j : ℕ) : ℚ)) := by
+  intro r
+  unfold OmegaB
+  -- 1. Factor each term `(w + r)^2 - (AK + j)^2` as `-(k + j)(2AK - k + j)(1 - w/(k+j))(1 + w/(2AK-k+j))`:
+  have h_term :
+      ∀ j ∈ Finset.Icc 1 BK,
+        (w + r) ^ 2 - ((AK + j : ℕ) : ℚ) ^ 2 =
+          (-1 : ℚ) * ((k + j : ℕ) : ℚ) * ((2 * AK - k + j : ℕ) : ℚ) *
+            ((1 - w / ((k + j : ℕ) : ℚ)) * (1 + w / ((2 * AK - k + j : ℕ) : ℚ))) := by
+    intro j hj
+    have hj_pos : 1 ≤ j := (Finset.mem_Icc.mp hj).1
+    have h1_ne : ((k + j : ℕ) : ℚ) ≠ 0 := by exact_mod_cast (by omega : k + j ≠ 0)
+    have h2_ne : ((2 * AK - k + j : ℕ) : ℚ) ≠ 0 :=
+      by exact_mod_cast (by omega : 2 * AK - k + j ≠ 0)
+    have h_factor1 :
+        ((k + j : ℕ) : ℚ) * (1 - w / ((k + j : ℕ) : ℚ)) = ((k + j : ℕ) : ℚ) - w := by
+      rw [mul_sub, mul_one, mul_div_cancel₀ _ h1_ne]
+    have h_factor2 :
+        ((2 * AK - k + j : ℕ) : ℚ) * (1 + w / ((2 * AK - k + j : ℕ) : ℚ)) =
+          ((2 * AK - k + j : ℕ) : ℚ) + w := by
+      rw [mul_add, mul_one, mul_div_cancel₀ _ h2_ne]
+    calc (w + r) ^ 2 - ((AK + j : ℕ) : ℚ) ^ 2
+        = (-1 : ℚ) * (((k + j : ℕ) : ℚ) - w) * (((2 * AK - k + j : ℕ) : ℚ) + w) := by
+          dsimp [r]
+          rw [Nat.cast_add (2 * AK - k) j, Nat.cast_sub hk]
+          push_cast
+          ring
+      _ = (-1 : ℚ) * (((k + j : ℕ) : ℚ) * (1 - w / ((k + j : ℕ) : ℚ))) *
+            (((2 * AK - k + j : ℕ) : ℚ) * (1 + w / ((2 * AK - k + j : ℕ) : ℚ))) := by
+          rw [h_factor1, h_factor2]
+      _ = (-1 : ℚ) * ((k + j : ℕ) : ℚ) * ((2 * AK - k + j : ℕ) : ℚ) *
+            ((1 - w / ((k + j : ℕ) : ℚ)) * (1 + w / ((2 * AK - k + j : ℕ) : ℚ))) := by ring
+  rw [Finset.prod_congr rfl h_term, Finset.prod_mul_distrib, Finset.prod_mul_distrib,
+      Finset.prod_mul_distrib, Finset.prod_const]
+  have h_card : (Finset.Icc 1 BK).card = BK := by rw [Nat.card_Icc]; omega
+  rw [h_card]
+  -- 2. Evaluate `∏_{j=1}^{BK} (k + j) = (BK)! * C(k + BK, BK)` and `∏_{j=1}^{BK} (2AK - k + j) = (BK)! * C(2AK - k + BK, BK)`:
+  have h_rising :
+      ∀ a : ℕ,
+        (∏ j ∈ Finset.Icc 1 BK, ((a + j : ℕ) : ℚ)) =
+          (BK.factorial : ℚ) * (Nat.choose (a + BK) BK : ℚ) := by
+    intro a
+    have h_bij :
+        (∏ j ∈ Finset.Icc 1 BK, ((a + j : ℕ) : ℚ)) =
+          ∏ m ∈ Finset.Icc (a + 1) (a + BK), (m : ℚ) := by
+      apply Finset.prod_bij (fun j _ => a + j)
+      · intro j hj; rw [Finset.mem_Icc] at hj ⊢; omega
+      · intro j₁ _ j₂ _ h_eq; omega
+      · intro m hm; rw [Finset.mem_Icc] at hm
+        exact ⟨m - a, Finset.mem_Icc.mpr ⟨by omega, by omega⟩, by omega⟩
+      · intro j _; rfl
+    have h_fac_id := prod_Icc_add_mul_factorial a BK
+    have h_choose_id :
+        ((a + BK).factorial : ℚ) =
+          (Nat.choose (a + BK) BK : ℚ) * (BK.factorial : ℚ) * (a.factorial : ℚ) := by
+      have hc := Nat.choose_mul_factorial_mul_factorial (by omega : BK ≤ a + BK)
+      rw [show a + BK - BK = a by omega] at hc
+      exact_mod_cast hc.symm
+    have ha_ne : (a.factorial : ℚ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero a
+    apply mul_right_cancel₀ ha_ne
+    rw [h_bij, h_fac_id, h_choose_id]
+    ring
+  rw [h_rising k, h_rising (2 * AK - k)]
+  have h_fac_ne : (BK.factorial : ℚ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero BK
+  field_simp [h_fac_ne]
+  ring
+
 end OddZetaFormalization
+
