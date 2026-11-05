@@ -1,0 +1,77 @@
+# ==========================================
+# Lean 4 & Lake Build System
+# ==========================================
+# Exclude the entire Lake workspace (build artifacts & downloaded dependencies)
+.lake
+.lake/
+**/.lake/
+lake-packages/
+**/lake-packages/
+build/
+**/build/
+
+# Compiled Lean AST caches and binary artifacts
+*.olean
+*.ilean
+*.c
+*.o
+*.so
+*.dylib
+*.dll
+*.a
+
+# ==========================================
+# Google AI Studio / Web App / Node.js
+# ==========================================
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.next/
+**/.next/
+out/
+**/out/
+.cache/
+**/.cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Secret environment files
+.env
+.env*.local
+.env.local
+
+# ==========================================
+# Python (if present)
+# ==========================================
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.venv/
+**/venv/
+
+# ==========================================
+# Manuscript & LaTeX Auxiliary Files
+# ==========================================
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+
+# ==========================================
+# OS & Editor Files
+# ==========================================
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.idea/

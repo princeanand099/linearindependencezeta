@@ -1,6 +1,6 @@
 {
   "name": "Lean 4 Workspace",
-  "image": "://microsoft.com",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -8,5 +8,5 @@
       ]
     }
   },
-  "postCreateCommand": "curl https://githubusercontent.com -sSf | sh -s -- -y && . $HOME/.elan/env && lake new workspace math && cd workspace && lake update"
+  "postCreateCommand": "curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y && . $HOME/.elan/env && lake exe cache get && lake build"
 }

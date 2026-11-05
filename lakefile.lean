@@ -1,5 +1,5 @@
 import Lake
-open Lake Study
+open Lake DSL
 
 package «formalization» where
   -- Settings applied to both builds and targets
@@ -8,7 +8,7 @@ package «formalization» where
   ]
 
 require mathlib from git
-  "https://github.com"
+  "https://github.com/leanprover-community/mathlib4.git" @ "v4.15.0"
 
 @[default_target]
 lean_lib «Formalization» where

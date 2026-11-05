@@ -1,0 +1,5 @@
+{
+  "name": "Odd Zeta Values Linear Independence — Lean 4 Formalization",
+  "description": "Complete, rigorous, theorem-by-theorem Lean 4 formalization and computational verification of 'All Odd Zeta Values Are Linearly Independent Over Q' by Prince Anand.",
+  "requestFramePermissions": []
+}

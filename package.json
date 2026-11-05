@@ -1,0 +1,11 @@
+{
+  "name": "odd-zeta-linear-independence-lean4",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "python3 app.py",
+    "build": "python3 -m py_compile app.py",
+    "start": "python3 app.py",
+    "lint": "python3 -m py_compile app.py"
+  }
+}
