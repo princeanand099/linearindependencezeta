@@ -284,7 +284,7 @@ class AppRequestHandler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 3000))
+    port = int(os.environ.get("PORT", "3000"))
     server = ThreadingHTTPServer(("0.0.0.0", port), AppRequestHandler)
     print(f"Serving Odd Zeta Formalization Verification Server on http://0.0.0.0:{port}", flush=True)
     server.serve_forever()

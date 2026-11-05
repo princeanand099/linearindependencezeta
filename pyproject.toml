@@ -1,0 +1,2 @@
+[tool.ruff]
+extend-exclude = ["reproducibility2_final (1).py", ".lake", ".elan"]
