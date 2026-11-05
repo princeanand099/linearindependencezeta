@@ -234,11 +234,11 @@
                   <td><span class="badge badge-verified">Verified</span></td>
                 </tr>
                 <tr>
-                  <td class="mono">Theorem 7.1</td>
-                  <td>Euler Sine-Square Constant Λ̃_Euler(a) ≠ 0, Barrier Ratio ρ_bar = 16/209 &lt; 1/13, Non-Vanishing</td>
-                  <td class="mono">theorem_7_1_euler_constant_nonzero, theorem_7_1_step_ratios, liouville_integrality_contradiction</td>
+                  <td class="mono">Theorem 7.1 &amp; Proof of Thm. 1.1</td>
+                  <td>Euler Sine-Square Constant Λ̃_Euler(a) ≠ 0 (7.1), Core Subset 𝒞_I^{core} (7.2), Block-Gaussian Head Det (7.3), Constructive Sign Coherence (7.4), Reverse Triangle Non-Vanishing (7.5), Laplace Partition (7.6), Total Positivity of S_K(J) (7.7), Inversion Parity Cancellation (7.8)–(7.9), Step Ratios (7.10)–(7.13), Barrier Sum Suppression Across All A_0K ≥ 1 (7.14), Unified Theorem 7.1 (i)–(ii), Degree Margin (7.15) &amp; 4-Step Liouville Contradiction Assembly (7.16)–(7.18)</td>
+                  <td class="mono">theorem_7_1_euler_constant_nonzero, theorem_7_1_eq_7_1_initial_coeffs, theorem_7_1_eq_7_2_classICore_nonempty, theorem_7_1_i_complement_structure, theorem_7_1_eq_7_6_partition_sum, theorem_7_1_eq_7_7_SK_summand_pos, theorem_7_1_step1_eq_7_8_inversion_count, theorem_7_1_step1_eq_7_9_exact_cancellation, theorem_7_1_step1_sign_adjusted_tail_poly, theorem_7_1_step1_euler_row_combination, theorem_7_1_step1_eq_7_3_MHead_det, theorem_7_1_i_eq_7_4_constructive_addition, theorem_7_1_step2_eq_7_10_bottom_step_ratio, theorem_7_1_step2_eq_7_11_barrier_bound, theorem_7_1_step2_eq_7_12_top_step_ratio, theorem_7_1_step2_binomial_barrier_sum_identity, theorem_7_1_step2_eq_7_14_barrier_factor_le_at_one, theorem_7_1_step2_eq_7_14_barrier_sum_suppression, theorem_7_1_asymptotic_nonvanishing_full, theorem_7_1_ii_eq_7_5_reverse_triangle_nonvanishing, theorem_1_1_eq_7_15_poly_natDegree_bound, theorem_1_1_eq_7_17_liouville_lower_bound, theorem_1_1_eq_7_18_exponential_decay_lt_one, liouville_integrality_contradiction, theorem_1_1_section_7_four_step_contradiction</td>
                   <td class="mono">Formalization/MainResults.lean</td>
-                  <td>Yes (Recorded in Sec. 7 Audit)</td>
+                  <td>Yes (ℓ = 1 factor ½ in (7.10) &amp; Sec. 7 Audit)</td>
                   <td><span class="badge badge-verified">Verified</span></td>
                 </tr>
               </tbody>
@@ -343,6 +343,22 @@
                     Proved the exact algebraic decomposition splitting <code>1 ≤ j ≤ n-1</code> and <code>j = n</code>:
                     <code>a_{2n+1} ℛ_0(P) - c S_{2n+1}(P) = a_{2n+1} ℛ_0^{cent}(P) - c_{cent} S_{2n+1}(P) - ∑_{j=1}^{n-1} H_{AK}^{(2j+1)} L^{(2j+1)}(P)</code>
                     in <code>Formalization/SchurAndValuation.lean</code>.
+                  </td>
+                  <td>Yes (Exact)</td>
+                </tr>
+                <tr>
+                  <td class="mono">Theorem 7.1 Step 2 Eq. (7.10)</td>
+                  <td>p. 38</td>
+                  <td>
+                    In Definition 2.1, <code>ℰ_0(u) := 1</code> whereas <code>ℰ_m(u) := (2/(2m)!) ∏_{t=0}^{m-1}(u-t²)</code> for <code>m ≥ 1</code>.
+                    Consequently, the step ratio <code>ℰ_{ℓ-1}(x²)/ℰ_ℓ(x²) = 2ℓ(2ℓ-1)/(x²-(ℓ-1)²)</code> holds with exact equality for all
+                    <code>ℓ ≥ 2</code> (including the entire barrier <code>ℓ ∈ {A_0K+1,..,2A_0K}</code> and tail <code>ℓ &gt; 2A_0K</code> since <code>A_0K ≥ 1</code>),
+                    while at <code>ℓ = 1</code> it carries a factor <code>1/(1 + δ_{ℓ,1}) = 1/2</code> (giving <code>1/x² ≤ 2/x²</code>).
+                  </td>
+                  <td>
+                    Proved both the exact equality <code>theorem_7_1_step2_eq_7_10_bottom_step_ratio</code> for all <code>ℓ ≥ 2</code>
+                    and the universal upper bound <code>theorem_7_1_step2_eq_7_10_all_ell_bound</code> across all <code>ℓ ≥ 1</code>
+                    in <code>Formalization/MainResults.lean</code>.
                   </td>
                   <td>Yes (Exact)</td>
                 </tr>
