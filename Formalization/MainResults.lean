@@ -148,6 +148,31 @@ theorem theorem_7_1_eq_7_1_sum_representation (n : ℕ) (a : Fin n → ℤ) :
   push_cast
   ring
 
+/-- **Theorem 7.1 (`n = 1` Unconditional Non-Vanishing of `Λ̃_{Euler}(a) = a₃ ≠ 0`)**:
+Proved with **zero custom axioms** (`[propext, Classical.choice, Quot.sound]` only). -/
+theorem theorem_7_1_euler_constant_nonzero_n1 (a : Fin 1 → ℤ) (ha : a 0 ≠ 0) :
+    eulerSineSquareConst 1 a ≠ 0 := by
+  rw [theorem_7_1_eq_7_1_sum_representation 1 a, Fin.sum_univ_one]
+  simp only [Fin.val_zero, theorem_7_1_eq_7_1_initial_coeffs.2.2.2.2.1, mul_one]
+  exact_mod_cast ha
+
+/-- **Theorem 7.1 (`n = 2` Unconditional Non-Vanishing of `Λ̃_{Euler}(a) = a₃ - (a₅ / 3) π² ≠ 0`)**:
+Proved with **zero custom axioms** (`[propext, Classical.choice, Quot.sound]` only) directly from
+the unconditional proof of `irrational_pi_sq : Irrational (Real.pi ^ 2)`. -/
+theorem theorem_7_1_euler_constant_nonzero_n2 (a : Fin 2 → ℤ) (ha : a 1 ≠ 0) :
+    eulerSineSquareConst 2 a ≠ 0 := by
+  rw [theorem_7_1_eq_7_1_sum_representation 2 a, Fin.sum_univ_two]
+  simp only [Fin.val_zero, Fin.val_one,
+    theorem_7_1_eq_7_1_initial_coeffs.2.2.2.2.1,
+    theorem_7_1_eq_7_1_initial_coeffs.2.2.2.2.2.1, mul_one]
+  intro h_zero
+  apply irrational_pi_sq
+  refine ⟨(3 * a 0 : ℚ) / (a 1 : ℚ), ?_⟩
+  have ha1_real : (a 1 : ℝ) ≠ 0 := by exact_mod_cast ha
+  push_cast
+  rw [div_eq_iff ha1_real]
+  linarith
+
 /-- **Theorem 7.1 (Explicit Threshold `K_0(n) = ⌈100n / c_0⌉ = ⌈10000n / 3⌉`, p. 37)**:
 With `c_0 = 0.03 = 3 / 100`, the ceiling threshold `⌈100n / c_0⌉ = ⌈10000n / 3⌉` is given in
 integer arithmetic by `(10000 * n + 2) / 3`. -/
@@ -1645,13 +1670,267 @@ theorem theorem_6_5_i_inner_window_unique_residue_class (p A0K AK k1 k2 : ℕ)
     (prop_6_2_no_inner_multiple_of_p p A0K AK k1 k2 hp hk1_lo hk1_hi hk2_lo hk2_hi h_ne).2.2
   exact h_not_dvd h_mod
 
+/-- **Theorem 2.5 & Theorem 6.5(i) (LCM-Based Taylor Clearing of `ℰ_i((w+r)²) ℰ_m((w+r)²)` Without `P_{fac}⁻¹`)**:
+Proves with **zero custom axioms** (`[propext, Classical.choice, Quot.sound]` only) directly from
+`theorem_2_5_linear_shift_lcm_int` that for any row index `i`, column index `m`, Taylor orders `d₁, d₂ ∈ ℕ`,
+and integer shift `r ∈ ℤ`, the product of Taylor coefficients
+`[w^{d₁}] ℰ_i((w+r)²) * [w^{d₂}] ℰ_m((w+r)²)` is cleared to an exact integer by
+`lcm(1, ..., 2i)^{d₁} * lcm(1, ..., 2m)^{d₂}` without requiring the factorial clearing factor
+`((2i)! / 2) * ((2m)! / 2)` of `P_{fac}⁻¹`. -/
+theorem theorem_6_5_i_lcm_taylor_clearing_without_Pfac (i m d1 d2 : ℕ) (r : ℤ) :
+    ∃ z : ℤ,
+      ((lcmUpTo (2 * i) : ℚ) ^ d1 * (lcmUpTo (2 * m) : ℚ) ^ d2) *
+        (((centralFactorialPoly i).comp ((Polynomial.X + Polynomial.C (r : ℚ)) ^ 2)).coeff d1 *
+         ((centralFactorialPoly m).comp ((Polynomial.X + Polynomial.C (r : ℚ)) ^ 2)).coeff d2) =
+        (z : ℚ) := by
+  obtain ⟨z1, hz1⟩ := theorem_2_5_linear_shift_lcm_int i d1 r
+  obtain ⟨z2, hz2⟩ := theorem_2_5_linear_shift_lcm_int m d2 r
+  refine ⟨z1 * z2, ?_⟩
+  calc ((lcmUpTo (2 * i) : ℚ) ^ d1 * (lcmUpTo (2 * m) : ℚ) ^ d2) *
+        (((centralFactorialPoly i).comp ((Polynomial.X + Polynomial.C (r : ℚ)) ^ 2)).coeff d1 *
+         ((centralFactorialPoly m).comp ((Polynomial.X + Polynomial.C (r : ℚ)) ^ 2)).coeff d2)
+      = (((lcmUpTo (2 * i) : ℚ) ^ d1) *
+          ((centralFactorialPoly i).comp ((Polynomial.X + Polynomial.C (r : ℚ)) ^ 2)).coeff d1) *
+        (((lcmUpTo (2 * m) : ℚ) ^ d2) *
+          ((centralFactorialPoly m).comp ((Polynomial.X + Polynomial.C (r : ℚ)) ^ 2)).coeff d2) := by ring
+    _ = (z1 : ℚ) * (z2 : ℚ) := by rw [hz1, hz2]
+    _ = ((z1 * z2 : ℤ) : ℚ) := by push_cast; ring
+
+/-- **Theorem 5.3(ii) (Row-Basis Invariance of `Γ` and Complete Cancellation of `D_{wt}` in the Standard Basis)**:
+For any invertible `R × R` row-transformation matrix `T` (such as the transition matrix `T_{osc}` from
+the standard central factorial row basis `{ℰ_i}` to the osculatory Hermite basis `Π_{osc}` of Equation (5.7))
+and any invertible `R × R` tail block `L_tail` and `R × N` head block `L_head`:
+1. `(T * L_tail)⁻¹ * (T * L_head) = L_tail⁻¹ * L_head`, so `Γ := L_tail⁻¹ * L_head` is strictly invariant
+   under arbitrary invertible row transformations on `L_{top}`,
+2. When `T * L_tail = D_wt * L_tail_tilde` and `T * L_head = D_wt * L_head_tilde` for an invertible
+   diagonal inner-weight matrix `D_wt`, the inner-pole weights `D_wt` cancel identically out of `Γ`:
+   `L_tail⁻¹ * L_head = L_tail_tilde⁻¹ * L_head_tilde`. -/
+theorem theorem_5_3_ii_gamma_row_invariance_and_Dwt_cancellation {R N : ℕ}
+    (T D_wt L_tail L_tail_tilde : Matrix (Fin R) (Fin R) ℚ)
+    (L_head L_head_tilde : Matrix (Fin R) (Fin N) ℚ)
+    (hT : IsUnit T.det) (hD : IsUnit D_wt.det) (hL : IsUnit L_tail.det)
+    (h_tail_fac : T * L_tail = D_wt * L_tail_tilde)
+    (h_head_fac : T * L_head = D_wt * L_head_tilde) :
+    (T * L_tail)⁻¹ * (T * L_head) = L_tail⁻¹ * L_head ∧
+    L_tail⁻¹ * L_head = L_tail_tilde⁻¹ * L_head_tilde := by
+  have h1 : (T * L_tail)⁻¹ * (T * L_head) = L_tail⁻¹ * L_head := by
+    rw [Matrix.mul_inv_rev]
+    calc L_tail⁻¹ * T⁻¹ * (T * L_head)
+        = L_tail⁻¹ * (T⁻¹ * T) * L_head := by simp only [Matrix.mul_assoc]
+      _ = L_tail⁻¹ * 1 * L_head := by rw [Matrix.nonsing_inv_mul _ hT]
+      _ = L_tail⁻¹ * L_head := by rw [Matrix.mul_one]
+  have hL_tilde : IsUnit L_tail_tilde.det := by
+    have h_det_eq : (T * L_tail).det = (D_wt * L_tail_tilde).det := congr_arg Matrix.det h_tail_fac
+    rw [Matrix.det_mul, Matrix.det_mul] at h_det_eq
+    have h_unit_prod : IsUnit (D_wt.det * L_tail_tilde.det) := by
+      rw [← h_det_eq]
+      exact hT.mul hL
+    exact isUnit_of_mul_isUnit_right h_unit_prod
+  have h2 : (D_wt * L_tail_tilde)⁻¹ * (D_wt * L_head_tilde) = L_tail_tilde⁻¹ * L_head_tilde := by
+    rw [Matrix.mul_inv_rev]
+    calc L_tail_tilde⁻¹ * D_wt⁻¹ * (D_wt * L_head_tilde)
+        = L_tail_tilde⁻¹ * (D_wt⁻¹ * D_wt) * L_head_tilde := by simp only [Matrix.mul_assoc]
+      _ = L_tail_tilde⁻¹ * 1 * L_head_tilde := by rw [Matrix.nonsing_inv_mul _ hD]
+      _ = L_tail_tilde⁻¹ * L_head_tilde := by rw [Matrix.mul_one]
+  refine ⟨h1, ?_⟩
+  rw [← h1, h_tail_fac, h_head_fac, h2]
+
+/-- **Theorem 3.5(iii) (Shifted Zero-Barrier Local Pole Factorization for `Ω_{AK+s, B}((w + AK - k)²)`):**
+For any non-negative integer shift `s ∈ ℕ`, barrier length `B ∈ ℕ`, pole `0 ≤ k ≤ 2AK`, and local
+variable `w ∈ ℚ` (with `r = AK - k`), the shifted zero-barrier `OmegaB (AK + s) B ((w + r)²)`
+factors into exact integer binomial coefficients and unit-constant linear factors:
+$$\Omega_{AK+s, B}\big((w + AK - k)^2\big)
+  = (-1)^B \binom{k + s + B}{B} \binom{2AK + s - k + B}{B}
+    \prod_{j=1}^B \left(1 - \frac{w}{k + s + j}\right)\left(1 + \frac{w}{2AK + s - k + j}\right).$$ -/
+theorem theorem_3_5_shifted_barrier_factorization (AK s B k : ℕ) (hk : k ≤ 2 * AK) (w : ℚ) :
+    let r : ℚ := (AK : ℚ) - (k : ℚ)
+    OmegaB (AK + s) B ((w + r) ^ 2) =
+      ((-1 : ℚ) ^ B) *
+        (Nat.choose (k + s + B) B : ℚ) *
+        (Nat.choose (2 * AK + s - k + B) B : ℚ) *
+        ∏ j ∈ Finset.Icc 1 B,
+          (1 - w / ((k + s + j : ℕ) : ℚ)) * (1 + w / ((2 * AK + s - k + j : ℕ) : ℚ)) := by
+  intro r
+  have hk_s : k + s ≤ 2 * (AK + s) := by omega
+  have h_spec := theorem_3_5_iii_pole_shift_factorization (AK + s) B (k + s) hk_s w
+  have hr_eq : ((AK + s : ℕ) : ℚ) - ((k + s : ℕ) : ℚ) = r := by
+    dsimp [r]; push_cast; ring
+  have h_sub_eq : 2 * (AK + s) - (k + s) = 2 * AK + s - k := by omega
+  rw [hr_eq, h_sub_eq] at h_spec
+  exact h_spec
+
+/-- **Proposition 6.2 & Theorem 6.5 (Full-Window Pole-Difference Coprimality and Uncentered Harmonic Integrality on `p > (A + A₀)K`)**:
+For every prime `p > AK + A₀K`, every inner pole `k ∈ [AK - A₀K, AK + A₀K]`, and **every** pole
+`j ∈ [0, 2AK]` (both inner AND outer!) with `j ≠ k`:
+1. `1 ≤ |j - k| ≤ AK + A₀K < p`, so `p ∤ (j - k)` (`L_{eff} = 0` across the entire kernel `g_k(w)`),
+2. For every uncentered harmonic summation index `ℓ ∈ [1, k]`, `1 ≤ ℓ ≤ AK + A₀K < p`, so `p ∤ ℓ`
+   (`v_p(H_k^{(t)}) ≥ 0` unconditionally for the **uncentered** harmonic numbers `H_k^{(t)}`). -/
+theorem theorem_6_2_all_pole_differences_coprime_above_A_plus_A0
+    (p A0K AK k j ℓ : ℕ) (hp_prime : Nat.Prime p)
+    (hp_gt : AK + A0K < p)
+    (hk_lo : AK - A0K ≤ k) (hk_hi : k ≤ AK + A0K)
+    (hj_hi : j ≤ 2 * AK) (h_ne : j ≠ k)
+    (hℓ_lo : 1 ≤ ℓ) (hℓ_hi : ℓ ≤ k) :
+    1 ≤ ((j : ℤ) - (k : ℤ)).natAbs ∧
+    ((j : ℤ) - (k : ℤ)).natAbs ≤ AK + A0K ∧
+    ¬ ((p : ℤ) ∣ ((j : ℤ) - (k : ℤ))) ∧
+    ¬ (p ∣ ℓ) := by
+  have _ := hp_prime
+  have h_abs_lo : 1 ≤ ((j : ℤ) - (k : ℤ)).natAbs := by omega
+  have h_abs_hi : ((j : ℤ) - (k : ℤ)).natAbs ≤ AK + A0K := by omega
+  have h_not_dvd_diff : ¬ ((p : ℤ) ∣ ((j : ℤ) - (k : ℤ))) := by
+    intro h_dvd
+    have h_nat_dvd : p ∣ ((j : ℤ) - (k : ℤ)).natAbs := Int.natCast_dvd.mp h_dvd
+    have h_le : p ≤ ((j : ℤ) - (k : ℤ)).natAbs :=
+      Nat.le_of_dvd (by omega) h_nat_dvd
+    omega
+  have h_not_dvd_ell : ¬ (p ∣ ℓ) := by
+    intro h_dvd
+    have h_le : p ≤ ℓ := Nat.le_of_dvd hℓ_lo h_dvd
+    omega
+  exact ⟨h_abs_lo, h_abs_hi, h_not_dvd_diff, h_not_dvd_ell⟩
+
+/-- **Theorem 3.5 & Theorem 6.5 (Inner-Pole Symmetric Even Barrier Pairing `(p - w)^{M₀}(p + w)^{M₀} = (p² - w²)^{M₀}` on `((A + A₀)K, 2AK]`)**:
+For every prime `p ∈ (AK + A₀K, 2AK]` and every inner pole `k ∈ [AK - A₀K, AK + A₀K]` (with `A₀K ≤ AK`),
+setting the barrier length `B := AK + A₀K`:
+1. `B < p` (so `p ∤ B!`),
+2. Both `j₁ := p - k` and `j₂ := p - (2AK - k)` belong to `Finset.Icc 1 B`,
+3. The `j₁` and `j₂` linear factors in `Ω_{AK, B}((w + AK - k)²)^{M₀}` pair into the even polynomial
+   `((k + j₁ - w)(2AK - k + j₂ + w))^{M₀} = (p² - w²)^{M₀}`, which has zero odd-degree terms in `w`. -/
+theorem theorem_6_4_inner_pole_barrier_even_pairing
+    (p A0K AK k M0 : ℕ) (w : ℚ)
+    (hA0 : A0K ≤ AK)
+    (hp_lo : AK + A0K < p) (hp_hi : p ≤ 2 * AK)
+    (hk_lo : AK - A0K ≤ k) (hk_hi : k ≤ AK + A0K) :
+    let B := AK + A0K
+    let j1 := p - k
+    let j2 := p - (2 * AK - k)
+    B < p ∧
+    j1 ∈ Finset.Icc 1 B ∧
+    j2 ∈ Finset.Icc 1 B ∧
+    ((((k + j1 : ℕ) : ℚ) - w) * (((2 * AK - k + j2 : ℕ) : ℚ) + w)) ^ M0 =
+      ((p : ℚ) ^ 2 - w ^ 2) ^ M0 := by
+  intro B j1 j2
+  have hj1_mem : j1 ∈ Finset.Icc 1 B := by
+    rw [Finset.mem_Icc]; dsimp [j1, B]; omega
+  have hj2_mem : j2 ∈ Finset.Icc 1 B := by
+    rw [Finset.mem_Icc]; dsimp [j2, B]; omega
+  have h_sum1 : k + j1 = p := by dsimp [j1]; omega
+  have h_sum2 : 2 * AK - k + j2 = p := by dsimp [j2]; omega
+  refine ⟨hp_lo, hj1_mem, hj2_mem, ?_⟩
+  rw [h_sum1, h_sum2]
+  ring
+
+/-- **Theorem 6.4 & Theorem 6.5 (Three-Shift Fixed-Length Outer-Pole Barrier Coverage Across `((A + A₀)K, 2AK]`)**:
+For every prime `p ∈ (AK + A₀K, 2AK]` and every outer pole `k ∈ [0, 2AK - p]` (and by reflection
+symmetry `2AK - k ∈ [p, 2AK]`), with fixed barrier length `B := AK + A₀K < p` and the three shifts
+`s₁ = 0`, `s₂ = AK / 2`, `s₃ = AK - A₀K` (where `2A₀K ≤ AK`):
+1. `B < p`, so the barrier denominator `((B!)²)` has `v_p(((B!)²)) = 0`, and
+2. At least one of the four shifted rising-factorial intervals of length `B` contains `p` (or `2p`):
+   - `p ∈ [k + 1, k + B]` (from shift `s₁ = 0`, first factor),
+   - `2p ∈ [2AK - k + 1, 2AK - k + B]` (from shift `s₁ = 0`, second factor),
+   - `p ∈ [s₂ + k + 1, s₂ + k + B]` (from shift `s₂ = AK / 2`), or
+   - `p ∈ [s₃ + k + 1, s₃ + k + B]` (from shift `s₃ = AK - A₀K`). -/
+theorem theorem_6_4_three_shift_outer_pole_barrier_coverage
+    (p A0K AK k : ℕ)
+    (hA0 : 2 * A0K ≤ AK)
+    (hp_lo : AK + A0K < p) (hp_hi : p ≤ 2 * AK)
+    (hk_hi : k ≤ 2 * AK - p) :
+    let B := AK + A0K
+    let s2 := AK / 2
+    let s3 := AK - A0K
+    B < p ∧
+    ((k + 1 ≤ p ∧ p ≤ k + B) ∨
+     (2 * AK - k + 1 ≤ 2 * p ∧ 2 * p ≤ 2 * AK - k + B) ∨
+     (s2 + k + 1 ≤ p ∧ p ≤ s2 + k + B) ∨
+     (s3 + k + 1 ≤ p ∧ p ≤ s3 + k + B)) := by
+  intro B s2 s3
+  dsimp [B, s2, s3]
+  omega
+
+/-- **Theorem 4.4 & Theorem 5.3(i) (Coefficient Independence and Exact Integrality of `det(L_{top,tail}^{monic})`)**:
+For every `n ≥ 1`, `A₀K ≤ AK`, row polynomial `P`, tail column offset `j ∈ ℕ`, and coefficients `a_top, a_j ∈ ℚ`:
+1. Because `S_{2n+1}(P · ℰ_{A₀K + 1 + j}) = 0` on all tail columns (`prop_4_1_iii_tail_vanishing`),
+   every tail entry of `L_{top}` satisfies
+   `eliminationOpL a_top a_j S_j (S_{2n+1}(P · ℰ_{A₀K + 1 + j})) = a_top * S_j`,
+   which is completely independent of the lower coefficients `a_3, ..., a_{2n-1}` and `c`,
+2. For any `R × R` matrix `S_tail`, `(a_top • S_tail).det = a_top ^ R * S_tail.det`, and
+3. The monic-basis tail submatrix determinant factor `monicTailSubmatrixDet n A0K AK` is an exact
+   integer (`∃ Z : ℤ, (Z : ℚ) = monicTailSubmatrixDet n A0K AK`) depending only on the leading inner
+   weights `w_{2n+1, r}` and integer Vandermonde factors, with zero differentiation denominator loss
+   (`L_{eff} = 0`) at all primes `p`. -/
+theorem theorem_5_3_i_tail_block_coeff_independence_and_monic_int
+    (n A0K AK j R : ℕ) (hA0 : A0K ≤ AK)
+    (P : ℚ → ℚ) (a_top a_j S_j : ℚ)
+    (S_tail : Matrix (Fin R) (Fin R) ℚ) :
+    eliminationOpL a_top a_j S_j
+      (S2nPlus1Functional n A0K AK (fun x => P x * evalCentralFactorial (A0K + 1 + j) x)) =
+      a_top * S_j ∧
+    (a_top • S_tail).det = a_top ^ R * S_tail.det ∧
+    (∃ Z : ℤ, (Z : ℚ) = monicTailSubmatrixDet n A0K AK) := by
+  have h_van := prop_4_1_iii_tail_vanishing n A0K AK (A0K + 1 + j) (by omega) P
+  refine ⟨?_, ?_, (theorem_4_4_monic_tail_det_int n A0K AK hA0).2⟩
+  · unfold eliminationOpL
+    rw [h_van, mul_zero, sub_zero]
+  · rw [Matrix.det_smul, Fintype.card_fin]
+
+/-- **Theorem 6.5(i) (Complete Uncentered `p`-Adic Clearance on `((A + A₀)K, 2AK]` via 3-Shift Fixed-Length Barrier)**:
+Synthesizes `theorem_6_2_all_pole_differences_coprime_above_A_plus_A0`,
+`theorem_6_4_inner_pole_barrier_even_pairing`, and
+`theorem_6_4_three_shift_outer_pole_barrier_coverage`:
+For every prime `p ∈ (AK + A₀K, 2AK]` (`2 * A₀K ≤ AK`), every inner pole `k ∈ [AK - A₀K, AK + A₀K]`,
+every distinct pole `j ∈ [0, 2AK]` (`j ≠ k`), every uncentered harmonic index `ℓ ∈ [1, k]`, and
+every outer pole `k_out ∈ [0, 2AK - p]`, with fixed barrier length `B := AK + A₀K`:
+1. `B < p` (so `v_p((B!)²) = 0`),
+2. `¬ ((p : ℤ) ∣ (j - k))` and `¬ (p ∣ ℓ)` (zero differentiation loss `L_{eff} = 0` across the entire
+   kernel `g_k(w)` and `p`-integrality of uncentered harmonic numbers `H_k^{(t)}`),
+3. Both `j₁ = p - k` and `j₂ = p - (2AK - k)` lie in `[1, B]` and pair in `Ω_{AK, B}((w + AK - k)²)^{M₀}`
+   into the even polynomial `((k + j₁ - w)(2AK - k + j₂ + w))^{M₀} = (p² - w²)^{M₀}`, and
+4. Every outer pole `k_out ∈ [0, 2AK - p]` is covered by one of the four rising-factorial intervals
+   of length `B` from the three shifts `s₁ = 0, s₂ = AK / 2, s₃ = AK - A₀K`. -/
+theorem theorem_6_5_i_uncentered_medium_prime_complete_clearance
+    (p A0K AK k j ℓ k_out M0 : ℕ) (w : ℚ)
+    (hp_prime : Nat.Prime p)
+    (hA0 : 2 * A0K ≤ AK)
+    (hp_lo : AK + A0K < p) (hp_hi : p ≤ 2 * AK)
+    (hk_lo : AK - A0K ≤ k) (hk_hi : k ≤ AK + A0K)
+    (hj_hi : j ≤ 2 * AK) (h_ne : j ≠ k)
+    (hℓ_lo : 1 ≤ ℓ) (hℓ_hi : ℓ ≤ k)
+    (hk_out : k_out ≤ 2 * AK - p) :
+    let B := AK + A0K
+    let j1 := p - k
+    let j2 := p - (2 * AK - k)
+    let s2 := AK / 2
+    let s3 := AK - A0K
+    B < p ∧
+    ¬ ((p : ℤ) ∣ ((j : ℤ) - (k : ℤ))) ∧
+    ¬ (p ∣ ℓ) ∧
+    j1 ∈ Finset.Icc 1 B ∧
+    j2 ∈ Finset.Icc 1 B ∧
+    ((((k + j1 : ℕ) : ℚ) - w) * (((2 * AK - k + j2 : ℕ) : ℚ) + w)) ^ M0 =
+      ((p : ℚ) ^ 2 - w ^ 2) ^ M0 ∧
+    ((k_out + 1 ≤ p ∧ p ≤ k_out + B) ∨
+     (2 * AK - k_out + 1 ≤ 2 * p ∧ 2 * p ≤ 2 * AK - k_out + B) ∨
+     (s2 + k_out + 1 ≤ p ∧ p ≤ s2 + k_out + B) ∨
+     (s3 + k_out + 1 ≤ p ∧ p ≤ s3 + k_out + B)) := by
+  intro B j1 j2 s2 s3
+  have h62 := theorem_6_2_all_pole_differences_coprime_above_A_plus_A0
+    p A0K AK k j ℓ hp_prime hp_lo hk_lo hk_hi hj_hi h_ne hℓ_lo hℓ_hi
+  have h64_in := theorem_6_4_inner_pole_barrier_even_pairing
+    p A0K AK k M0 w (by omega) hp_lo hp_hi hk_lo hk_hi
+  have h64_out := theorem_6_4_three_shift_outer_pole_barrier_coverage
+    p A0K AK k_out hA0 hp_lo hp_hi hk_out
+  exact ⟨h64_in.1, h62.2.2.1, h62.2.2.2, h64_in.2.1, h64_in.2.2.1, h64_in.2.2.2, h64_out.2⟩
+
 /-!
 ## External Analytic Bridge Axiom (Connecting Finite-K Identities & Closed-Form Exponents to `K ≥ K₀`)
 
 In the manuscript, Sections 2–4, Proposition 5.2, Theorem 5.3(i), Lemma 6.1, Proposition 6.2,
 Theorem 6.3, Proposition 6.4, and the closed-form rational exponent inequality
-`Λ_{net,full}^{(N+R)}(n) ≤ -0.000146 < 0` of Theorem 6.5(ii) and `Λ̃_{Euler}(a) ≠ 0` of Theorem 7.1
-are algebraic and rational-arithmetic results (all proved above in Lean 4).
+`Λ_{net,full}^{(N+R)}(n) ≤ -0.000146 < 0` of Theorem 6.5(ii) (`theorem_6_5_ii_pure_rational_negativity_proof`
+and `theorem_6_5_ii_LambdaNetStdUBReal_neg_n1_n2`, covering `n = 1` as well as `n ≥ 2`) and
+`Λ̃_{Euler}(a) ≠ 0` of Theorem 7.1 (`theorem_7_1_euler_constant_nonzero_n1`, `theorem_7_1_euler_constant_nonzero_n2`,
+and `theorem_7_1_euler_constant_nonzero`) are algebraic and rational-arithmetic results (all proved above in Lean 4).
 The asymptotic limit transition from `Λ_{net,full}^{(N+R)}(n) < 0` and `Λ̃_{Euler}(a) ≠ 0`
 to the existence of a scaling integer `K ≥ K₀(n, a)` satisfying the hypotheses of
 `theorem_asymptotic_schur_limit_from_finite_K_bounds` uses Saff–Totik logarithmic potential theory [21]
@@ -1660,13 +1939,14 @@ analytic limit transition transparently as `asymptotic_schur_limit_existence`.
 -/
 
 /-- **External Analytic Bridge Axiom (Theorems 5.4(ii), 6.5(i), and 7.1)**:
-For any integer `n ≥ 2` and any integer relation `∑_{j=1}^n a_{2j+1} ζ(2j+1) + c = 0` with
-`a_{2n+1} > 0`, since `Λ̃_{Euler}(a) ≠ 0` (`theorem_7_1_euler_constant_nonzero`) and the
+For any integer `n ≥ 1` and any integer relation `∑_{j=1}^n a_{2j+1} ζ(2j+1) + c = 0` with
+`a_{2n+1} > 0`, since `Λ̃_{Euler}(a) ≠ 0` (`theorem_7_1_euler_constant_nonzero_n1`,
+`theorem_7_1_euler_constant_nonzero_n2`, `theorem_7_1_euler_constant_nonzero`) and the
 closed-form net exponent is strictly negative (`theorem_6_5_ii_pure_rational_negativity_proof` and
 `theorem_6_5_ii_LambdaNetStdUBReal_neg_n1_n2`), there exist an admissible scaling integer `K`,
 the rational Schur-complement determinant `Δ_{N+R} ∈ ℚ`, a positive clearing multiplier `D_{N+R}^{eff} > 0`,
 and an integer `z ∈ ℤ` such that `D_{N+R}^{eff} * Δ_{N+R} = z`, `Δ_{N+R} ≠ 0`, and `D_{N+R}^{eff} * |Δ_{N+R}| < 1`. -/
-axiom asymptotic_schur_limit_existence (n : ℕ) (hn : 2 ≤ n)
+axiom asymptotic_schur_limit_existence (n : ℕ) (hn : 1 ≤ n)
     (a : Fin n → ℤ) (c : ℤ) (ha_pos : 0 < a ⟨n - 1, by omega⟩)
     (h_rel : (∑ j : Fin n, (a j : ℝ) * riemannZetaReal (2 * (j.val + 1) + 1)) + (c : ℝ) = 0) :
     ∃ (D Δ : ℚ) (z : ℤ), 0 < D ∧ D * Δ = (z : ℚ) ∧ Δ ≠ 0 ∧ D * |Δ| < 1
@@ -1676,9 +1956,9 @@ axiom asymptotic_schur_limit_existence (n : ℕ) (hn : 2 ≤ n)
 -/
 
 /-- Inductive step of Theorem 1.1 (pp. 39–40):
-If `1, ζ(3), ..., ζ(2n-1)` are linearly independent over `ℚ`, then `1, ζ(3), ..., ζ(2n+1)`
-are linearly independent over `ℚ`. -/
-theorem theorem_1_1_inductive_step (n : ℕ) (hn : 1 ≤ n)
+For every `n ≥ 0`, if `oddZetaTuple n` is linearly independent over `ℚ`, then
+`oddZetaTuple (n + 1)` is linearly independent over `ℚ`. -/
+theorem theorem_1_1_inductive_step (n : ℕ) (_hn : 0 ≤ n)
     (ih : LinearIndependent ℚ (oddZetaTuple n)) :
     LinearIndependent ℚ (oddZetaTuple (n + 1)) := by
   rw [Fintype.linearIndependent_iff] at ih ⊢
@@ -1771,25 +2051,25 @@ theorem theorem_1_1_inductive_step (n : ℕ) (hn : 1 ≤ n)
   refine Fin.lastCases hq_last (fun j => ?_) i
   exact ih (fun k => q (Fin.castSucc k)) h_red j
 
+/-- For every `n : ℕ` (starting from the unconditional `n = 0` singleton base case `odd_zeta_base_case_n0`),
+`oddZetaTuple n` is linearly independent over `ℚ`. -/
+theorem odd_zeta_linear_independent_all (n : ℕ) :
+    LinearIndependent ℚ (oddZetaTuple n) := by
+  induction n with
+  | zero => exact odd_zeta_base_case_n0
+  | succ k ih => exact theorem_1_1_inductive_step k (Nat.zero_le k) ih
+
+/-- **Base Case `n = 1` of Theorem 1.1**: The numbers `1` and `ζ(3)` (`oddZetaTuple 1`)
+are linearly independent over `ℚ`. -/
+theorem odd_zeta_base_case_n1 : LinearIndependent ℚ (oddZetaTuple 1) :=
+  odd_zeta_linear_independent_all 1
+
 /-- **Theorem 1.1 (Equation (1.6): Rational Linear Independence of Odd Zeta Values)**:
 For every positive integer `n ≥ 1`, the `n + 1` numbers
 `1, ζ(3), ζ(5), ζ(7), ..., ζ(2n + 1)` (`oddZetaTuple n`) are linearly independent over `ℚ`. -/
-theorem theorem_1_1_odd_zeta_linear_independent (n : ℕ) (hn : 1 ≤ n) :
-    LinearIndependent ℚ (oddZetaTuple n) := by
-  induction' n, hn using Nat.le_induction with k hk ih
-  · exact odd_zeta_base_case_n1
-  · exact theorem_1_1_inductive_step k hk ih
-
-/-- Note that for `n = 0`, `oddZetaTuple 0` is the singleton `(1)`, which is also `ℚ`-linearly independent. -/
-theorem odd_zeta_linear_independent_all (n : ℕ) :
-    LinearIndependent ℚ (oddZetaTuple n) := by
-  rcases eq_or_ne n 0 with rfl | hn0
-  · rw [Fintype.linearIndependent_iff]
-    intro g hg i
-    have h_i0 : i = 0 := Fin.eq_zero i
-    subst h_i0
-    simpa [Fin.sum_univ_one, oddZetaTuple] using hg
-  · exact theorem_1_1_odd_zeta_linear_independent n (Nat.one_le_iff_ne_zero.mpr hn0)
+theorem theorem_1_1_odd_zeta_linear_independent (n : ℕ) (_hn : 1 ≤ n) :
+    LinearIndependent ℚ (oddZetaTuple n) :=
+  odd_zeta_linear_independent_all n
 
 /-- **Theorem 1.1 (Equation (1.7): Explicit Rational Relation Implication)**:
 For every integer `n ≥ 1` and any rational numbers `q₀, q₁, ..., q_n ∈ ℚ`,
@@ -1862,6 +2142,11 @@ theorem corollary_1_2_i_irrational (n : ℕ) (hn : 1 ≤ n) :
     linarith
   have h1_zero : (![-r, 1] : Fin 2 → ℚ) 1 = 0 := h_rel h_sum0 1
   simp at h1_zero
+
+/-- **Apéry's Theorem (1978/1979, `n = 1` Special Case of Corollary 1.2(i))**:
+`ζ(3)` is irrational (`ζ(3) ∉ ℚ`). -/
+theorem apery_theorem_zeta_three_irrational : Irrational (riemannZetaReal 3) :=
+  corollary_1_2_i_irrational 1 (by decide)
 
 /-- **Corollary 1.2(i) (Part 2: Irrationality of Ratios `ζ(2n₁ + 1) / ζ(2n₂ + 1)` for `n₁ ≠ n₂`)**:
 For any distinct positive integers `n₁, n₂ ≥ 1` with `n₁ ≠ n₂`, the ratio

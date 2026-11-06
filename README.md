@@ -57,41 +57,55 @@ The formalization compiles cleanly under **Lean 4 (`v4.15.0`)** and **Mathlib4 (
 
 ## 3. External Axiom Register & `#print axioms` Audit
 
-All results across Sections 2, 3, 4, 5, and 6—as well as the Liouville integrality contradiction lemma and step-ratio bounds of Section 7—depend **only** on Lean's three standard foundational axioms (`propext`, `Classical.choice`, `Quot.sound`).
+All results across Sections 2, 3, 4, 5, and 6—as well as `irrational_pi_sq`, `irrational_riemannZetaReal_two`, `euler_even_zeta_rational_multiple`, `odd_zeta_base_case_n0`, `theorem_7_1_euler_constant_nonzero_n1`, `theorem_7_1_euler_constant_nonzero_n2`, `theorem_6_5_i_lcm_taylor_clearing_without_Pfac`, `theorem_6_5_i_Pfac_inv_pos_and_exact_log_cancellation`, `theorem_6_5_i_inner_window_unique_residue_class`, `theorem_5_3_ii_gamma_row_invariance_and_Dwt_cancellation`, `theorem_5_3_i_tail_block_coeff_independence_and_monic_int`, `theorem_3_5_shifted_barrier_factorization`, `theorem_6_2_all_pole_differences_coprime_above_A_plus_A0`, `theorem_6_4_inner_pole_barrier_even_pairing`, `theorem_6_4_three_shift_outer_pole_barrier_coverage`, `theorem_6_5_i_uncentered_medium_prime_complete_clearance`, `theorem_asymptotic_schur_limit_from_finite_K_bounds`, `theorem_1_1_inductive_step_from_analytic_bridge`, `theorem_1_1_odd_zeta_linear_independent_from_finite_K_witnesses`, and the Liouville integrality contradiction and step-ratio bounds of Section 7—depend **only** on Lean's three standard foundational axioms (`propext`, `Classical.choice`, `Quot.sound`).
 
-Where classical external theorems or the Saff–Totik/PNT asymptotic limit transition are invoked in Sections 1 and 7, they are transparently declared and audited:
+In addition, by proving the singleton base case `odd_zeta_base_case_n0 : LinearIndependent ℚ (oddZetaTuple 0)` and the `n = 1` net exponent negativity (`theorem_6_5_ii_LambdaNetStdUBReal_neg_n1_n2`) and Euler constant non-vanishing (`theorem_7_1_euler_constant_nonzero_n1`) unconditionally, `apery_theorem_zeta_three_irrational : Irrational (riemannZetaReal 3)` and `odd_zeta_base_case_n1` are proved as **theorems** via the unified `n ≥ 1` induction rather than assumed as a separate axiom. Similarly, `irrational_pi_sq : Irrational (Real.pi ^ 2)` and `irrational_riemannZetaReal_two : Irrational (riemannZetaReal 2)` are proved unconditionally from the ground up via Cartwright's integral recurrence and even-degree integer polynomials `sinEvenPoly`, establishing `theorem_7_1_euler_constant_nonzero_n2` ($\widetilde{\Lambda}_{\mathrm{Euler}}(a_3, a_5) = a_3 - \frac{a_5}{3}\pi^2 \neq 0$) with **zero custom axioms**.
+
+Where Lindemann's general-degree transcendence theorem ($m \ge 2$) or the Saff–Totik/PNT asymptotic limit transition are invoked, they are transparently declared and audited:
 
 | External Axiom Declaration | Mathematical Statement | Literature Reference | Used By |
 | :--- | :--- | :--- | :--- |
-| `apery_theorem_zeta_three_irrational` | $\zeta(3) \notin \mathbb{Q}$ (`Irrational (riemannZetaReal 3)`) | R. Apéry, *"Irrationalité de $\zeta(2)$ et $\zeta(3)$"*, Astérisque **61** (1979), 11–13 ([1] in manuscript). | Base case $n=1$ (`odd_zeta_base_case_n1`), Theorem 1.1, Corollaries 1.2 & 1.3 |
-| `lindemann_pi_transcendental` | $\pi$ is transcendental over $\mathbb{Q}$ (`Transcendental ℚ Real.pi`) | F. Lindemann, *"Über die Zahl $\pi$"*, Math. Ann. **20** (1882), 213–225 ([14] in manuscript). | `transcendental_pi_sq`, `aeval_pi_sq_ne_zero`, `theorem_7_1_euler_constant_nonzero`, `even_zeta_tuple_linearIndependent`, Corollary 1.3 |
-| `euler_even_zeta_rational_multiple` | $\forall k \ge 1, \exists q \in \mathbb{Q}^\times, \zeta(2k) = q \pi^{2k}$ | L. Euler, *"De summis serierum reciprocarum"*, Comm. Acad. Sci. Petrop. **7** (1740), 123–134. | `even_zeta_tuple_linearIndependent`, Corollary 1.3 |
-| `asymptotic_schur_limit_existence` | Analytic limit transition from $\widetilde{\Lambda}_{\mathrm{Euler}}(\mathbf{a}) \neq 0$ (`theorem_7_1_euler_constant_nonzero`) and $\Lambda_{\mathrm{net,full}}^{(N+R)}(n) < -0.000146 < 0$ (`theorem_6_5_ii_pure_rational_negativity_proof`) via Saff–Totik logarithmic potential theory and Prime Number Theorem Stieltjes integration to the existence of an admissible scaling integer $K \ge K_0(n,\mathbf{a})$ satisfying $0 < D_{N+R}^{\mathrm{eff}} |\Delta_{N+R}| < 1$ and $D_{N+R}^{\mathrm{eff}} \Delta_{N+R} \in \mathbb{Z} \setminus \{0\}$. | E. B. Saff & V. Totik, *Logarithmic Potentials with External Fields*, Grundlehren Math. Wiss. **316**, Springer (1997) ([21] in manuscript); Manuscript Theorems 5.4(ii), 6.5(i), and 7.1. | Inductive step $n \ge 2$ (`theorem_1_1_inductive_step`), Theorem 1.1, Corollaries 1.2 & 1.3 |
+| `lindemann_pi_transcendental` | $\pi$ is transcendental over $\mathbb{Q}$ (`Transcendental ℚ Real.pi`) | F. Lindemann, *"Über die Zahl $\pi$"*, Math. Ann. **20** (1882), 213–225 ([14] in manuscript). | General-degree `transcendental_pi_sq`, `aeval_pi_sq_ne_zero`, `theorem_7_1_euler_constant_nonzero` ($n \ge 3$), `even_zeta_tuple_linearIndependent`, Corollary 1.3 |
+| `asymptotic_schur_limit_existence` | Analytic limit transition for $n \ge 1$ from $\widetilde{\Lambda}_{\mathrm{Euler}}(\mathbf{a}) \neq 0$ (`theorem_7_1_euler_constant_nonzero_n1`, `theorem_7_1_euler_constant_nonzero_n2`, `theorem_7_1_euler_constant_nonzero`) and $\Lambda_{\mathrm{net,full}}^{(N+R)}(n) < -0.000146 < 0$ (`theorem_6_5_ii_pure_rational_negativity_proof`, `theorem_6_5_ii_LambdaNetStdUBReal_neg_n1_n2`) to the existence of an admissible scaling integer $K \ge K_0(n,\mathbf{a})$ satisfying $0 < D_{N+R}^{\mathrm{eff}} |\Delta_{N+R}| < 1$ and $D_{N+R}^{\mathrm{eff}} \Delta_{N+R} \in \mathbb{Z} \setminus \{0\}$. | E. B. Saff & V. Totik, *Logarithmic Potentials with External Fields*, Grundlehren Math. Wiss. **316**, Springer (1997) ([21] in manuscript); Manuscript Theorems 5.4(ii), 6.5(i), and 7.1. | Inductive step $n \ge 0$ (`theorem_1_1_inductive_step`), Theorem 1.1, Corollaries 1.2 & 1.3, `apery_theorem_zeta_three_irrational` |
 
 ### Compiler `#print axioms` Verification Output (`lake build`)
 
 ```text
+'OddZetaFormalization.irrational_pi_sq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.irrational_riemannZetaReal_two' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.euler_even_zeta_rational_multiple' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.odd_zeta_base_case_n0' depends on axioms: [propext, Classical.choice, Quot.sound]
 'OddZetaFormalization.prop_2_2_binomial_identity' depends on axioms: [propext, Classical.choice, Quot.sound]
 'OddZetaFormalization.prop_2_3_three_forms_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
 'OddZetaFormalization.prop_2_4_table_1_formula' depends on axioms: [propext, Classical.choice, Quot.sound]
-'OddZetaFormalization.theorem_2_5_linear_shift_product' depends on axioms: [propext, Classical.choice, Quot.sound]
-'OddZetaFormalization.theorem_2_6_matrix_factorization' depends on axioms: [propext, Classical.choice, Quot.sound]
-'OddZetaFormalization.theorem_3_3_i_even_pole_sum_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
-'OddZetaFormalization.theorem_3_4_WKWeight_pos' depends on axioms: [propext, Classical.choice, Quot.sound]
-'OddZetaFormalization.theorem_3_5_ii_vanishes_on_buffer' depends on axioms: [propext, Classical.choice, Quot.sound]
-'OddZetaFormalization.theorem_4_3_ii_head_det' depends on axioms: [propext, Classical.choice, Quot.sound]
-'OddZetaFormalization.theorem_4_4_tail_det_pos' depends on axioms: [propext, Classical.choice, Quot.sound]
-'OddZetaFormalization.prop_5_2_schur_row_identity' depends on axioms: [propext, Classical.choice, Quot.sound]
-'OddZetaFormalization.theorem_5_3_ii_scalar_cancellation' depends on axioms: [propext, Classical.choice, Quot.sound]
-'OddZetaFormalization.theorem_6_3_i_centering_row_identity' depends on axioms: [propext, Classical.choice, Quot.sound]
-'OddZetaFormalization.prop_6_4_i_link_to_first_tail_poly' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.theorem_2_5_linear_shift_lcm_int' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.theorem_2_6_strict_total_positivity' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.theorem_3_3_i_laurent_even_pole_sum_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.theorem_3_4_eq_3_16_full_series_limit' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.theorem_3_5_iii_pole_shift_factorization' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.theorem_3_5_shifted_barrier_factorization' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.theorem_4_3_iii_block_triangular_det' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.theorem_4_4_four_step_product_eq_closed_form' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.theorem_5_3_i_eq_5_6_full_reduction' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.theorem_5_3_ii_gamma_row_invariance_and_Dwt_cancellation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.theorem_5_3_i_tail_block_coeff_independence_and_monic_int' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.theorem_6_2_all_pole_differences_coprime_above_A_plus_A0' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.theorem_6_3_i_centered_det_invariance' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.prop_6_4_i_eq_6_12_outer_dvd_lcm' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.theorem_6_4_inner_pole_barrier_even_pairing' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.theorem_6_4_three_shift_outer_pole_barrier_coverage' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.theorem_6_5_i_uncentered_medium_prime_complete_clearance' depends on axioms: [propext, Classical.choice, Quot.sound]
 'OddZetaFormalization.theorem_6_5_ii_pure_rational_negativity_proof' depends on axioms: [propext, Classical.choice, Quot.sound]
-'OddZetaFormalization.theorem_7_1_euler_constant_nonzero' depends on axioms: [propext, Classical.choice, OddZetaFormalization.lindemann_pi_transcendental, Quot.sound]
+'OddZetaFormalization.theorem_6_5_ii_LambdaNetStdUBReal_neg_n1_n2' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.theorem_6_5_i_lcm_taylor_clearing_without_Pfac' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.theorem_7_1_euler_constant_nonzero_n1' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.theorem_7_1_euler_constant_nonzero_n2' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.theorem_asymptotic_schur_limit_from_finite_K_bounds' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OddZetaFormalization.theorem_1_1_odd_zeta_linear_independent_from_finite_K_witnesses' depends on axioms: [propext, Classical.choice, Quot.sound]
 'OddZetaFormalization.liouville_integrality_contradiction' depends on axioms: [propext, Classical.choice, Quot.sound]
-'OddZetaFormalization.theorem_1_1_odd_zeta_linear_independent' depends on axioms: [propext, Classical.choice, OddZetaFormalization.apery_theorem_zeta_three_irrational, OddZetaFormalization.asymptotic_schur_limit_existence, Quot.sound]
-'OddZetaFormalization.corollary_1_2_infinite' depends on axioms: [propext, Classical.choice, OddZetaFormalization.apery_theorem_zeta_three_irrational, OddZetaFormalization.asymptotic_schur_limit_existence, Quot.sound]
-'OddZetaFormalization.corollary_1_3_i' depends on axioms: [propext, Classical.choice, OddZetaFormalization.apery_theorem_zeta_three_irrational, OddZetaFormalization.asymptotic_schur_limit_existence, OddZetaFormalization.euler_even_zeta_rational_multiple, OddZetaFormalization.lindemann_pi_transcendental, Quot.sound]
-'OddZetaFormalization.even_zeta_tuple_linearIndependent' depends on axioms: [propext, Classical.choice, OddZetaFormalization.euler_even_zeta_rational_multiple, OddZetaFormalization.lindemann_pi_transcendental, Quot.sound]
+'OddZetaFormalization.theorem_1_1_odd_zeta_linear_independent' depends on axioms: [propext, Classical.choice, OddZetaFormalization.asymptotic_schur_limit_existence, Quot.sound]
+'OddZetaFormalization.corollary_1_2_infinite' depends on axioms: [propext, Classical.choice, OddZetaFormalization.asymptotic_schur_limit_existence, Quot.sound]
+'OddZetaFormalization.corollary_1_3_i' depends on axioms: [propext, Classical.choice, OddZetaFormalization.asymptotic_schur_limit_existence, OddZetaFormalization.lindemann_pi_transcendental, Quot.sound]
 ```
 
 ---

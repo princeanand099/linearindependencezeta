@@ -1,4 +1,6 @@
 import Mathlib.Analysis.PSeries
+import Mathlib.Analysis.SpecialFunctions.Integrals
+import Mathlib.Topology.Algebra.Order.Floor
 import Mathlib.NumberTheory.ZetaValues
 import Mathlib.Data.Real.Irrational
 import Mathlib.RingTheory.Algebraic.LinearIndependent
@@ -12,9 +14,11 @@ import Mathlib.Tactic
 # Section 1 Preliminaries: Riemann Zeta Values at Positive Integers and Classical Literature Results
 
 This module formalizes Equation (1.1), Equation (1.2), the tuple of odd zeta values
-`1, ζ(3), ζ(5), ..., ζ(2n+1)`, and the classical peer-reviewed theorems cited in Section 1
+`1, ζ(3), ζ(5), ..., ζ(2n+1)`, and the classical results cited in Section 1
 of Prince Anand, *"All Odd Zeta Values Are Linearly Independent Over ℚ"*:
-1. **Apéry's Theorem (1978/1979)** [1]: `ζ(3) ∉ ℚ` (base case `n = 1` of Theorem 1.1).
+1. **Unconditional Irrationality of `π²` and `ζ(2)`** (`irrational_pi_sq`, `irrational_riemannZetaReal_two`):
+   Proved from the ground up in Lean 4 + Mathlib4 via Cartwright's integral recurrence and even-degree
+   integer polynomials `sinEvenPoly`.
 2. **Lindemann's Theorem (1882)** [17]: `π` is transcendental over `ℚ`.
 3. **Euler's Even Zeta Formula (1740)** [7]: `ζ(2k) = ρ_k π^{2k}` with `ρ_k ∈ ℚ \ {0}`,
    proved unconditionally from `hasSum_zeta_nat` in `Mathlib.NumberTheory.ZetaValues`.
@@ -22,7 +26,8 @@ of Prince Anand, *"All Odd Zeta Values Are Linearly Independent Over ℚ"*:
 
 namespace OddZetaFormalization
 
-open scoped BigOperators
+open scoped BigOperators Nat
+open intervalIntegral MeasureTheory.MeasureSpace Set Polynomial Real Filter
 
 /-- **Equation (1.1)**: The real Riemann zeta value at an integer `s`
 $$\zeta(s) := \sum_{m=1}^{\infty} \frac{1}{m^s} = \sum_{m=0}^{\infty} \frac{1}{(m+1)^s}.$$ -/
@@ -78,18 +83,265 @@ theorem oddZetaTuple_eq_oddZetaSeq (n : ℕ) (i : Fin (n + 1)) :
     oddZetaTuple n i = oddZetaSeq i.val := by
   rcases Fin.eq_zero_or_eq_succ i with rfl | ⟨j, rfl⟩ <;> rfl
 
+/-- **Base Case `n = 0`**: The singleton tuple `(1)` (`oddZetaTuple 0`) is linearly independent over `ℚ`. -/
+theorem odd_zeta_base_case_n0 : LinearIndependent ℚ (oddZetaTuple 0) := by
+  rw [Fintype.linearIndependent_iff]
+  intro g hg i
+  have hi0 : i = 0 := Fin.eq_zero i
+  subst hi0
+  simpa [Fin.sum_univ_one, oddZetaTuple] using hg
+
+/-!
+## Ground-Up Unconditional Proof of `Irrational (Real.pi ^ 2)` and `Irrational (riemannZetaReal 2)`
+
+We adapt Cartwright's integral recurrence `I n θ = ∫ x in (-1)..1, (1 - x ^ 2) ^ n * cos (x * θ)`
+by observing that `sinPoly n` contains only even powers of `θ`, i.e.,
+`sinPoly n θ = sinEvenPoly n (θ ^ 2)` where `(sinEvenPoly n).natDegree ≤ n`.
+Evaluating at `θ = π / 2` where `sin (π / 2) = 1` and `cos (π / 2) = 0` yields
+`(π / 2) * I n (π / 2) * ((π / 2) ^ 2) ^ n = n! * sinEvenPoly n ((π / 2) ^ 2)`,
+proving `Irrational (Real.pi ^ 2)` and `Irrational (riemannZetaReal 2)` with zero custom axioms.
+-/
+
+private noncomputable def cartwrightI (n : ℕ) (θ : ℝ) : ℝ :=
+  ∫ x in (-1)..1, (1 - x ^ 2) ^ n * cos (x * θ)
+
+private lemma cartwrightI_zero (θ : ℝ) : cartwrightI 0 θ * θ = 2 * sin θ := by
+  rw [mul_comm, cartwrightI]
+  simp [mul_integral_comp_mul_right, two_mul]
+
+private lemma cartwright_recursion' (n : ℕ) (θ : ℝ) :
+    cartwrightI (n + 1) θ * θ ^ 2 = - (2 * 2 * ((n + 1) * (0 ^ n * cos θ))) +
+      2 * (n + 1) * (2 * n + 1) * cartwrightI n θ -
+      4 * (n + 1) * n * cartwrightI (n - 1) θ := by
+  rw [cartwrightI]
+  let f (x : ℝ) : ℝ := 1 - x ^ 2
+  let u₁ (x : ℝ) : ℝ := f x ^ (n + 1)
+  let u₁' (x : ℝ) : ℝ := - (2 * (n + 1) * x * f x ^ n)
+  let v₁ (x : ℝ) : ℝ := sin (x * θ)
+  let v₁' (x : ℝ) : ℝ := cos (x * θ) * θ
+  let u₂ (x : ℝ) : ℝ := x * (f x) ^ n
+  let u₂' (x : ℝ) : ℝ := (f x) ^ n - 2 * n * x ^ 2 * (f x) ^ (n - 1)
+  let v₂ (x : ℝ) : ℝ := cos (x * θ)
+  let v₂' (x : ℝ) : ℝ := -sin (x * θ) * θ
+  have hfd : Continuous f := by fun_prop
+  have hu₁d : Continuous u₁' := by fun_prop
+  have hv₁d : Continuous v₁' := by fun_prop
+  have hu₂d : Continuous u₂' := by fun_prop
+  have hv₂d : Continuous v₂' := by fun_prop
+  have hu₁_eval_one : u₁ 1 = 0 := by simp only [u₁, f]; simp
+  have hu₁_eval_neg_one : u₁ (-1) = 0 := by simp only [u₁, f]; simp
+  have t : u₂ 1 * v₂ 1 - u₂ (-1) * v₂ (-1) = 2 * (0 ^ n * cos θ) := by simp [u₂, v₂, f, ← two_mul]
+  have hf (x) : HasDerivAt f (- 2 * x) x := by
+    convert (hasDerivAt_pow 2 x).const_sub 1 using 1
+    simp
+  have hu₁ (x) : HasDerivAt u₁ (u₁' x) x := by
+    convert (hf x).pow _ using 1
+    simp only [Nat.add_succ_sub_one, u₁', Nat.cast_add_one]
+    ring
+  have hv₁ (x) : HasDerivAt v₁ (v₁' x) x := (hasDerivAt_mul_const θ).sin
+  have hu₂ (x) : HasDerivAt u₂ (u₂' x) x := by
+    convert (hasDerivAt_id' x).mul ((hf x).pow _) using 1
+    simp only [u₂']
+    ring
+  have hv₂ (x) : HasDerivAt v₂ (v₂' x) x := (hasDerivAt_mul_const θ).cos
+  convert_to (∫ (x : ℝ) in (-1)..1, u₁ x * v₁' x) * θ = _ using 1
+  · simp_rw [u₁, v₁', f, ← intervalIntegral.integral_mul_const, sq θ, mul_assoc]
+  rw [integral_mul_deriv_eq_deriv_mul (fun x _ => hu₁ x) (fun x _ => hv₁ x)
+    (hu₁d.intervalIntegrable _ _) (hv₁d.intervalIntegrable _ _), hu₁_eval_one, hu₁_eval_neg_one,
+    zero_mul, zero_mul, sub_zero, zero_sub, ← integral_neg, ← integral_mul_const]
+  convert_to ((-2 : ℝ) * (n + 1)) * ∫ (x : ℝ) in (-1)..1, (u₂ x * v₂' x) = _ using 1
+  · rw [← integral_const_mul]
+    congr 1 with x
+    dsimp [u₁', v₁, u₂, v₂']
+    ring
+  rw [integral_mul_deriv_eq_deriv_mul (fun x _ => hu₂ x) (fun x _ => hv₂ x)
+    (hu₂d.intervalIntegrable _ _) (hv₂d.intervalIntegrable _ _),
+    mul_sub, t, neg_mul, neg_mul, neg_mul, sub_neg_eq_add]
+  have (x) : u₂' x = (2 * n + 1) * f x ^ n - 2 * n * f x ^ (n - 1) := by
+    cases n with
+    | zero => simp [u₂']
+    | succ n => ring!
+  simp_rw [this, sub_mul, mul_assoc _ _ (v₂ _)]
+  have : Continuous v₂ := by fun_prop
+  rw [mul_mul_mul_comm, integral_sub, mul_sub, add_sub_assoc]
+  · congr 1
+    simp_rw [integral_const_mul]
+    ring!
+  all_goals exact Continuous.intervalIntegrable (by fun_prop) _ _
+
+private lemma cartwright_recursion (n : ℕ) (θ : ℝ) :
+    cartwrightI (n + 2) θ * θ ^ 2 =
+      2 * (n + 2) * (2 * n + 3) * cartwrightI (n + 1) θ -
+      4 * (n + 2) * (n + 1) * cartwrightI n θ := by
+  rw [cartwright_recursion' (n + 1) θ]
+  simp
+  ring!
+
+private lemma cartwrightI_one (θ : ℝ) :
+    cartwrightI 1 θ * θ ^ 3 = 4 * sin θ - 4 * θ * cos θ := by
+  rw [_root_.pow_succ, ← mul_assoc, cartwright_recursion' 0 θ, sub_mul, add_mul,
+    mul_assoc _ (cartwrightI 0 θ), cartwrightI_zero]
+  ring
+
+private noncomputable def sinEvenPoly : ℕ → ℤ[X]
+  | 0 => C 2
+  | 1 => C 4
+  | (n + 2) => ((2 : ℤ) * (2 * n + 3)) • sinEvenPoly (n + 1) + monomial 1 (-4) * sinEvenPoly n
+
+private noncomputable def cosCartwrightPoly : ℕ → ℤ[X]
+  | 0 => 0
+  | 1 => monomial 1 (-4)
+  | (n + 2) => ((2 : ℤ) * (2 * n + 3)) • cosCartwrightPoly (n + 1) +
+      monomial 2 (-4) * cosCartwrightPoly n
+
+private lemma sinEvenPoly_natDegree_le : ∀ n : ℕ, (sinEvenPoly n).natDegree ≤ n
+  | 0 => by simp [sinEvenPoly]
+  | 1 => by simp [sinEvenPoly]
+  | n + 2 => by
+      rw [sinEvenPoly]
+      refine natDegree_add_le_of_degree_le ((natDegree_smul_le _ _).trans ?_) ?_
+      · exact (sinEvenPoly_natDegree_le (n + 1)).trans (by omega)
+      refine natDegree_mul_le.trans ?_
+      have h1 : (monomial 1 (-4 : ℤ)).natDegree ≤ 1 := natDegree_monomial_le (-4)
+      have h2 := sinEvenPoly_natDegree_le n
+      omega
+
+private lemma sinEvenPoly_add_cosCartwrightPoly_eval (θ : ℝ) :
+    ∀ n : ℕ,
+      cartwrightI n θ * θ ^ (2 * n + 1) =
+        n ! * ((sinEvenPoly n).eval₂ (Int.castRingHom ℝ) (θ ^ 2) * sin θ +
+          (cosCartwrightPoly n).eval₂ (Int.castRingHom ℝ) θ * cos θ)
+  | 0 => by simp [sinEvenPoly, cosCartwrightPoly, cartwrightI_zero]
+  | 1 => by simp [cartwrightI_one, sinEvenPoly, cosCartwrightPoly, sub_eq_add_neg]
+  | n + 2 => by
+      calc cartwrightI (n + 2) θ * θ ^ (2 * (n + 2) + 1)
+          = cartwrightI (n + 2) θ * θ ^ 2 * θ ^ (2 * n + 3) := by ring
+        _ = 2 * (n + 2) * (2 * n + 3) * (cartwrightI (n + 1) θ * θ ^ (2 * (n + 1) + 1)) -
+            4 * (n + 2) * (n + 1) * θ ^ 2 * (cartwrightI n θ * θ ^ (2 * n + 1)) := by
+              rw [cartwright_recursion]; ring
+        _ = _ := by
+              simp [sinEvenPoly_add_cosCartwrightPoly_eval, sinEvenPoly, cosCartwrightPoly,
+                Nat.factorial_succ]
+              ring
+
+private lemma intPoly_eval_rat_mul_pow {p : ℤ[X]} (a b : ℤ) {k : ℕ} (hp : p.natDegree ≤ k) :
+    ∃ z : ℤ, p.eval₂ (Int.castRingHom ℝ) (a / b) * (b : ℝ) ^ k = z := by
+  rcases eq_or_ne b 0 with rfl | hb
+  · rcases k.eq_zero_or_pos with rfl | hk
+    · exact ⟨p.coeff 0, by simp⟩
+    exact ⟨0, by simp [hk.ne']⟩
+  refine ⟨∑ i ∈ p.support, p.coeff i * a ^ i * b ^ (k - i), ?_⟩
+  conv => lhs; rw [← sum_monomial_eq p]
+  rw [eval₂_sum, sum, Finset.sum_mul, Int.cast_sum]
+  simp only [eval₂_monomial, eq_intCast, div_pow, Int.cast_mul, Int.cast_pow]
+  refine Finset.sum_congr rfl (fun i hi => ?_)
+  have ik := (le_natDegree_of_mem_supp i hi).trans hp
+  rw [mul_assoc, div_mul_comm, ← Int.cast_pow, ← Int.cast_pow, ← Int.cast_pow,
+    ← pow_sub_mul_pow b ik, ← Int.cast_div_charZero, Int.mul_ediv_cancel _ (pow_ne_zero _ hb),
+    ← mul_assoc, mul_right_comm, ← Int.cast_pow]
+  exact dvd_mul_left _ _
+
+private lemma cartwrightI_pos (n : ℕ) : 0 < cartwrightI n (Real.pi / 2) := by
+  refine integral_pos (by norm_num) (Continuous.continuousOn (by continuity)) ?_ ⟨0, by simp⟩
+  refine fun x hx => mul_nonneg (pow_nonneg ?_ _) ?_
+  · rw [sub_nonneg, sq_le_one_iff_abs_le_one, abs_le]
+    exact ⟨hx.1.le, hx.2⟩
+  refine cos_nonneg_of_neg_pi_div_two_le_of_le ?_ ?_ <;>
+  nlinarith [hx.1, hx.2, Real.pi_pos]
+
+private lemma cartwrightI_le (n : ℕ) : cartwrightI n (Real.pi / 2) ≤ 2 := by
+  rw [← norm_of_nonneg (cartwrightI_pos n).le]
+  refine (norm_integral_le_of_norm_le_const ?_).trans (show (1 : ℝ) * _ ≤ _ by norm_num)
+  intros x hx
+  simp only [uIoc_of_le, neg_le_self_iff, zero_le_one, mem_Ioc] at hx
+  rw [norm_eq_abs, abs_mul, abs_pow]
+  refine mul_le_one₀ (pow_le_one₀ (abs_nonneg _) ?_) (abs_nonneg _) (abs_cos_le_one _)
+  rw [abs_le]
+  constructor <;> nlinarith
+
+/-- **Unconditional Irrationality of `π²` (`π² ∉ ℚ`)**:
+Proved directly from Cartwright's integral identity and `sinEvenPoly` with zero custom axioms. -/
+theorem irrational_pi_sq : Irrational (Real.pi ^ 2) := by
+  have h_div4 : Irrational ((Real.pi / 2) ^ 2) := by
+    by_contra h_rat
+    rw [Irrational, not_not, Set.mem_range] at h_rat
+    rcases h_rat with ⟨q, hq⟩
+    let a : ℤ := q.num
+    let b : ℕ := q.den
+    have hb : 0 < b := q.pos
+    have h_ab : ((Real.pi / 2) ^ 2 : ℝ) = (a : ℝ) / (b : ℝ) := by
+      rw [← hq]
+      exact_mod_cast (Rat.num_div_den q).symm
+    have ha : (0 : ℝ) < (a : ℝ) := by
+      have h_pos : (0 : ℝ) < (a : ℝ) / (b : ℝ) := by
+        rw [← h_ab]
+        exact sq_pos_of_pos Real.pi_div_two_pos
+      rwa [lt_div_iff₀ (by positivity), zero_mul] at h_pos
+    have h_tendsto :
+        Tendsto (fun n : ℕ => Real.pi * ((a : ℝ) ^ n / (n ! : ℝ))) atTop (nhds 0) := by
+      rw [← mul_zero Real.pi]
+      exact (FloorSemiring.tendsto_pow_div_factorial_atTop (a : ℝ)).const_mul Real.pi
+    have h_ev :
+        ∀ᶠ n : ℕ in atTop,
+          (Real.pi / 2) * ((a : ℝ) ^ n / (n ! : ℝ)) * cartwrightI n (Real.pi / 2) < 1 := by
+      have h_lt := h_tendsto.eventually_lt_const (show (0 : ℝ) < 1 by norm_num)
+      filter_upwards [h_lt] with n hn
+      have hI_le := cartwrightI_le n
+      have h_pi2_pos : 0 < Real.pi / 2 := Real.pi_div_two_pos
+      have h_nonneg : 0 ≤ (Real.pi / 2) * ((a : ℝ) ^ n / (n ! : ℝ)) := by
+        positivity
+      have h_prod :
+          (Real.pi / 2) * ((a : ℝ) ^ n / (n ! : ℝ)) * cartwrightI n (Real.pi / 2) ≤
+            Real.pi * ((a : ℝ) ^ n / (n ! : ℝ)) := by
+        calc (Real.pi / 2) * ((a : ℝ) ^ n / (n ! : ℝ)) * cartwrightI n (Real.pi / 2)
+            ≤ (Real.pi / 2) * ((a : ℝ) ^ n / (n ! : ℝ)) * 2 :=
+              mul_le_mul_of_nonneg_left hI_le h_nonneg
+          _ = Real.pi * ((a : ℝ) ^ n / (n ! : ℝ)) := by ring
+      exact lt_of_le_of_lt h_prod hn
+    obtain ⟨n, hn_lt⟩ := h_ev.exists
+    have hn_pos :
+        0 < (Real.pi / 2) * ((a : ℝ) ^ n / (n ! : ℝ)) * cartwrightI n (Real.pi / 2) := by
+      have h1 : 0 < Real.pi / 2 := Real.pi_div_two_pos
+      have h2 : 0 < (a : ℝ) ^ n / (n ! : ℝ) := by positivity
+      exact mul_pos (mul_pos h1 h2) (cartwrightI_pos n)
+    obtain ⟨z, hz⟩ :
+        ∃ z : ℤ,
+          (sinEvenPoly n).eval₂ (Int.castRingHom ℝ) ((a : ℝ) / (b : ℝ)) * ((b : ℤ) : ℝ) ^ n = z :=
+      intPoly_eval_rat_mul_pow a (b : ℤ) (sinEvenPoly_natDegree_le n)
+    have h_eval := sinEvenPoly_add_cosCartwrightPoly_eval (Real.pi / 2) n
+    rw [Real.cos_pi_div_two, Real.sin_pi_div_two, mul_zero, mul_one, add_zero] at h_eval
+    have h_pow_split :
+        (Real.pi / 2) ^ (2 * n + 1) = (Real.pi / 2) * (((Real.pi / 2) ^ 2) ^ n) := by
+      rw [_root_.pow_succ', pow_mul]
+    rw [h_pow_split, h_ab] at h_eval
+    have h_eq_z :
+        (Real.pi / 2) * ((a : ℝ) ^ n / (n ! : ℝ)) * cartwrightI n (Real.pi / 2) = (z : ℝ) := by
+      rw [← hz]
+      have h_b_ne : (b : ℝ) ≠ 0 := by positivity
+      have h_fac_ne : (n ! : ℝ) ≠ 0 := by positivity
+      simp only [Int.cast_natCast]
+      rw [div_pow] at h_eval
+      field_simp at h_eval ⊢
+      linear_combination h_eval
+    have h_z_bounds : (0 : ℝ) < (z : ℝ) ∧ (z : ℝ) < 1 := by
+      rw [← h_eq_z]
+      exact ⟨hn_pos, hn_lt⟩
+    norm_cast at h_z_bounds
+    omega
+  intro ⟨r, hr⟩
+  apply h_div4
+  refine ⟨r / 4, ?_⟩
+  push_cast
+  calc ((r : ℝ) / 4) = (Real.pi ^ 2) / 4 := by rw [hr]
+    _ = (Real.pi / 2) ^ 2 := by ring
+
 /-!
 ## Classical Literature Results and Unconditional Proof of Euler's Even Zeta Formula
 -/
 
-/-- **External Axiom 1 (Apéry's Theorem, 1978/1979)**:
-R. Apéry, *"Irrationalité de ζ(2) et ζ(3)"*, Astérisque 61 (1979), 11–13.
-States that `ζ(3)` is irrational (`ζ(3) ∉ ℚ`). -/
-axiom apery_theorem_zeta_three_irrational : Irrational (riemannZetaReal 3)
-
-/-- **External Axiom 2 (Lindemann's Theorem, 1882)**:
+/-- **External Axiom (Lindemann's Theorem, 1882)**:
 F. Lindemann, *"Über die Zahl π"*, Math. Ann. 20 (1882), no. 2, 213–225.
-States that `π` is transcendental over `ℚ`. -/
+States that `π` is transcendental over `ℚ` (used for general degree `m ≥ 2` even-zeta tuples). -/
 axiom lindemann_pi_transcendental : Transcendental ℚ Real.pi
 
 /-- **Euler's Even Zeta Formula (1740, Equation (1.2), Proved Unconditionally via Mathlib)**:
@@ -99,7 +351,7 @@ where `ρ_k = (-1)^{k+1} 2^{2k-1} B_{2k} / (2k)!`. Proved directly from `hasSum_
 theorem euler_even_zeta_rational_multiple (k : ℕ) (hk : 1 ≤ k) :
     ∃ ρ : ℚ, ρ ≠ 0 ∧ riemannZetaReal (2 * k) = (ρ : ℝ) * Real.pi ^ (2 * k) := by
   let ρ : ℚ :=
-    (-1 : ℚ) ^ (k + 1) * (2 : ℚ) ^ (2 * k - 1) * bernoulli (2 * k) / ((2 * k).factorial : ℚ)
+    (-1 : ℚ) ^ (k + 1) * (2 : ℚ) ^ (2 * k - 1) * _root_.bernoulli (2 * k) / ((2 * k).factorial : ℚ)
   have h_sum_zero := hasSum_zeta_nat (by omega : k ≠ 0)
   have h_shift :=
     (hasSum_nat_add_iff' 1 (f := fun n : ℕ => (1 : ℝ) / (n : ℝ) ^ (2 * k))).mpr h_sum_zero
@@ -118,6 +370,19 @@ theorem euler_even_zeta_rational_multiple (k : ℕ) (hk : 1 ≤ k) :
     rw [h_eq, h0, Rat.cast_zero, zero_mul] at h_zeta_ne
     exact h_zeta_ne rfl
   exact ⟨ρ, hρ_ne, h_eq⟩
+
+/-- **Unconditional Irrationality of `ζ(2) = π² / 6`**:
+Proved with zero custom axioms from `euler_even_zeta_rational_multiple 1` and `irrational_pi_sq`. -/
+theorem irrational_riemannZetaReal_two : Irrational (riemannZetaReal 2) := by
+  obtain ⟨ρ, hρ_ne, h_eq⟩ := euler_even_zeta_rational_multiple 1 (by decide)
+  change riemannZetaReal 2 = (ρ : ℝ) * Real.pi ^ 2 at h_eq
+  intro ⟨q, hq⟩
+  apply irrational_pi_sq
+  refine ⟨q / ρ, ?_⟩
+  have hρ_real : (ρ : ℝ) ≠ 0 := by exact_mod_cast hρ_ne
+  push_cast
+  rw [div_eq_iff hρ_real]
+  linarith
 
 /-- If `x ∈ ℝ` is irrational, then the 2-tuple `(1, x) : Fin 2 → ℝ` is linearly independent over `ℚ`. -/
 theorem linearIndependent_one_and_irrational {x : ℝ} (hx : Irrational x) :
@@ -142,15 +407,6 @@ theorem linearIndependent_one_and_irrational {x : ℝ} (hx : Irrational x) :
   fin_cases i
   · exact hg0
   · exact hg1
-
-/-- **Base Case `n = 1` of Theorem 1.1**: The numbers `1` and `ζ(3)` (`oddZetaTuple 1`)
-are linearly independent over `ℚ` by Apéry's theorem. -/
-theorem odd_zeta_base_case_n1 : LinearIndependent ℚ (oddZetaTuple 1) := by
-  have h_eq : oddZetaTuple 1 = ![1, riemannZetaReal 3] := by
-    ext i
-    fin_cases i <;> rfl
-  rw [h_eq]
-  exact linearIndependent_one_and_irrational apery_theorem_zeta_three_irrational
 
 /-- By Lindemann's theorem, `π²` is transcendental over `ℚ`. -/
 theorem transcendental_pi_sq : Transcendental ℚ (Real.pi ^ 2) := by

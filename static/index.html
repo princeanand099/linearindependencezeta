@@ -219,26 +219,26 @@
                 </tr>
                 <tr>
                   <td class="mono">Def. 5.1, Prop. 5.2, Thm. 5.3–5.4</td>
-                  <td>Schur-Complement Moment Identity Δ_{N+R} (5.3), Block-Triangular Reduction (5.6), Q_d(u) Annihilation, Osculatory Left Factorization (5.7), Outer-Pole Cancellation (5.9), Cauchy–Binet Series (5.10) &amp; Archimedean Rate Kernels (5.11)–(5.19)</td>
-                  <td class="mono">lemma_5_1_integer_relation_wlog_pos, def_5_1_dimension_identities, prop_5_2_schur_row_identity, prop_5_2_full_moment_det_identity, theorem_5_3_i_eq_5_6_full_reduction, theorem_5_3_i_Qd_annihilated_by_Ltop, theorem_5_3_ii_eq_5_7_osculatory_left_factorization, theorem_5_3_ii_outer_pole_cancellation, theorem_5_4_i_eq_5_10_cauchy_binet, theorem_5_4_i_head_evaluation_det_pos, theorem_5_4_ii_degree_shift_suppression_ratio</td>
-                  <td class="mono">Formalization/SchurAndValuation.lean</td>
-                  <td>No (100% Mathlib proof)</td>
+                  <td>Schur-Complement Moment Identity Δ_{N+R} (5.3), Block-Triangular Reduction (5.6), Q_d(u) Annihilation, Row-Basis Invariance of Γ &amp; D_{wt} Cancellation (5.7), Tail Block Coefficient Independence, Outer-Pole Cancellation (5.9), Cauchy–Binet Series (5.10) &amp; Archimedean Rate Kernels (5.11)–(5.19)</td>
+                  <td class="mono">lemma_5_1_integer_relation_wlog_pos, def_5_1_dimension_identities, prop_5_2_schur_row_identity, prop_5_2_full_moment_det_identity, theorem_5_3_i_eq_5_6_full_reduction, theorem_5_3_i_Qd_annihilated_by_Ltop, theorem_5_3_ii_eq_5_7_osculatory_left_factorization, theorem_5_3_ii_gamma_row_invariance_and_Dwt_cancellation, theorem_5_3_i_tail_block_coeff_independence_and_monic_int, theorem_5_3_ii_outer_pole_cancellation, theorem_5_4_i_eq_5_10_cauchy_binet, theorem_5_4_i_head_evaluation_det_pos, theorem_5_4_ii_degree_shift_suppression_ratio</td>
+                  <td class="mono">Formalization/SchurAndValuation.lean &amp; MainResults.lean</td>
+                  <td>Yes (Row-Basis Invariance &amp; D_{wt} Cancellation in Γ)</td>
                   <td><span class="badge badge-verified">Verified</span></td>
                 </tr>
                 <tr>
                   <td class="mono">Lemma 6.1, Prop. 6.2, Thm. 6.3, Prop. 6.4, Thm. 6.5</td>
-                  <td>Base Kernel Valuation V_p(k), Inner Binomial Legendre Identity (6.7), Midpoint Harmonic Centering (6.9)–(6.11), Kummer Outer LCM Divisibility (6.12)–(6.14), Tail Prime Elimination, Real Log Enclosures &amp; Net Negativity Over ℝ and ℚ (6.16)–(6.24)</td>
-                  <td class="mono">lemma_6_1_eq_6_3_cauchy_product, lemma_6_1_valuation_exponent_sum, prop_6_2_eq_6_7_binomial_valuation, theorem_6_3_i_centering_row_identity, theorem_6_3_ii_inner_centered_harmonic_support, prop_6_4_i_eq_6_12_outer_dvd_lcm, prop_6_4_i_link_to_first_tail_poly, prop_6_4_i_eq_6_14_OmegaBdry_properties, prop_6_4_ii_tail_prime_elimination, theorem_6_5_i_gaussian_vanishing_gain, theorem_6_5_ii_step2_subinterval_floor_identities, theorem_6_5_ii_real_log_enclosures, theorem_6_5_ii_real_concavity_and_f_upper_at_67, theorem_6_5_ii_pure_rational_negativity_proof</td>
-                  <td class="mono">Formalization/SchurAndValuation.lean</td>
-                  <td>No (100% Mathlib proof)</td>
+                  <td>Base Kernel Valuation V_p(k), Full-Window Coprimality Above (A+A_0)K, Inner Symmetric Barrier Pairing (p²-w²)^{M_0}, 3-Shift Fixed-Length Outer-Pole Barrier Coverage, Real Log Enclosures &amp; Net Negativity Over ℝ and ℚ (6.16)–(6.24)</td>
+                  <td class="mono">lemma_6_1_eq_6_3_cauchy_product, lemma_6_1_valuation_exponent_sum, prop_6_2_eq_6_7_binomial_valuation, theorem_6_2_all_pole_differences_coprime_above_A_plus_A0, theorem_6_4_inner_pole_barrier_even_pairing, theorem_6_4_three_shift_outer_pole_barrier_coverage, theorem_6_5_i_uncentered_medium_prime_complete_clearance, theorem_6_5_i_lcm_taylor_clearing_without_Pfac, theorem_6_5_ii_real_log_enclosures, theorem_6_5_ii_LambdaNetStdUBReal_neg_n1_n2, theorem_6_5_ii_pure_rational_negativity_proof</td>
+                  <td class="mono">Formalization/SchurAndValuation.lean &amp; MainResults.lean</td>
+                  <td>Yes (3-Shift Fixed-Length Barrier &amp; LCM Clearing)</td>
                   <td><span class="badge badge-verified">Verified</span></td>
                 </tr>
                 <tr>
                   <td class="mono">Theorem 7.1 &amp; Proof of Thm. 1.1</td>
-                  <td>Euler Sine-Square Constant Λ̃_Euler(a) ≠ 0 (7.1), Core Subset 𝒞_I^{core} (7.2), Block-Gaussian Head Det (7.3), Constructive Sign Coherence (7.4), Reverse Triangle Non-Vanishing (7.5), Laplace Partition (7.6), Total Positivity of S_K(J) (7.7), Inversion Parity Cancellation (7.8)–(7.9), Step Ratios (7.10)–(7.13), Barrier Sum Suppression Across All A_0K ≥ 1 (7.14), Unified Theorem 7.1 (i)–(ii), Degree Margin (7.15) &amp; 4-Step Liouville Contradiction Assembly (7.16)–(7.18)</td>
-                  <td class="mono">theorem_7_1_euler_constant_nonzero, theorem_7_1_eq_7_1_initial_coeffs, theorem_7_1_eq_7_2_classICore_nonempty, theorem_7_1_i_complement_structure, theorem_7_1_eq_7_6_partition_sum, theorem_7_1_eq_7_7_SK_summand_pos, theorem_7_1_step1_eq_7_8_inversion_count, theorem_7_1_step1_eq_7_9_exact_cancellation, theorem_7_1_step1_sign_adjusted_tail_poly, theorem_7_1_step1_euler_row_combination, theorem_7_1_step1_eq_7_3_MHead_det, theorem_7_1_i_eq_7_4_constructive_addition, theorem_7_1_step2_eq_7_10_bottom_step_ratio, theorem_7_1_step2_eq_7_11_barrier_bound, theorem_7_1_step2_eq_7_12_top_step_ratio, theorem_7_1_step2_binomial_barrier_sum_identity, theorem_7_1_step2_eq_7_14_barrier_factor_le_at_one, theorem_7_1_step2_eq_7_14_barrier_sum_suppression, theorem_7_1_asymptotic_nonvanishing_full, theorem_7_1_ii_eq_7_5_reverse_triangle_nonvanishing, theorem_1_1_eq_7_15_poly_natDegree_bound, theorem_1_1_eq_7_17_liouville_lower_bound, theorem_1_1_eq_7_18_exponential_decay_lt_one, liouville_integrality_contradiction, theorem_1_1_section_7_four_step_contradiction</td>
-                  <td class="mono">Formalization/MainResults.lean</td>
-                  <td>Yes (ℓ = 1 factor ½ in (7.10) &amp; Sec. 7 Audit)</td>
+                  <td>Unconditional Irrationality of π² &amp; ζ(2), Euler Sine-Square Constant Λ̃_Euler(a) ≠ 0 (n=1, 2 &amp; General), Core Subset 𝒞_I^{core} (7.2), Block-Gaussian Head Det (7.3), Reverse Triangle Non-Vanishing (7.5), Step Ratios (7.10)–(7.13), Barrier Sum Suppression (7.14), Finite-K Conditional Bridge &amp; 4-Step Liouville Contradiction Assembly (7.16)–(7.18)</td>
+                  <td class="mono">irrational_pi_sq, irrational_riemannZetaReal_two, theorem_7_1_euler_constant_nonzero_n1, theorem_7_1_euler_constant_nonzero_n2, theorem_7_1_euler_constant_nonzero, theorem_7_1_eq_7_1_initial_coeffs, theorem_7_1_eq_7_2_classICore_nonempty, theorem_7_1_step1_eq_7_3_MHead_det, theorem_7_1_i_eq_7_4_constructive_addition, theorem_7_1_step2_eq_7_10_bottom_step_ratio, theorem_7_1_step2_eq_7_14_barrier_sum_suppression, theorem_7_1_asymptotic_nonvanishing_full, theorem_7_1_ii_eq_7_5_reverse_triangle_nonvanishing, theorem_asymptotic_schur_limit_from_finite_K_bounds, theorem_1_1_inductive_step_from_analytic_bridge, theorem_1_1_odd_zeta_linear_independent_from_finite_K_witnesses, liouville_integrality_contradiction</td>
+                  <td class="mono">Formalization/MainResults.lean &amp; ZetaPreliminaries.lean</td>
+                  <td>Yes (ℓ = 1 factor ½ in (7.10) &amp; Unconditional π² Proof)</td>
                   <td><span class="badge badge-verified">Verified</span></td>
                 </tr>
               </tbody>
@@ -254,7 +254,7 @@
           <p>
             Every proof in the manuscript was independently audited step-by-step during Lean 4 formalization.
             Below is the transparent record of all proof repairs, implicit domain refinements, and mathematical
-            obstructions identified during formalization.
+            obstructions identified and resolved during formalization.
           </p>
           <div class="table-wrap">
             <table>
@@ -279,7 +279,8 @@
                   <td>
                     Formalized the exact polynomial identity <code>ℰ_m((X+r)²) = ∑_{k=0}^{2m} (C(r+m, 2m-k) + C(r+m-1, 2m-k)) C(X, k)</code>
                     over <code>ℚ[X]</code> via Chu–Vandermonde convolution and proved general LCM integrality
-                    <code>lcm(1,..,2m)^d [w^d] ℰ_m((w+r)²) ∈ ℤ</code> for all <code>m, d ∈ ℕ, r ∈ ℤ</code> in <code>Formalization/CentralFactorial.lean</code>.
+                    <code>lcm(1,..,2m)^d [w^d] ℰ_m((w+r)²) ∈ ℤ</code> (`theorem_2_5_linear_shift_lcm_int`) and
+                    <code>theorem_6_5_i_lcm_taylor_clearing_without_Pfac</code> without requiring <code>P_{fac}⁻¹</code>.
                   </td>
                   <td>Yes (Exact)</td>
                 </tr>
@@ -300,7 +301,7 @@
                   <td>Yes (Exact)</td>
                 </tr>
                 <tr>
-                  <td class="mono">Theorem 3.5 Eq. (3.20)</td>
+                  <td class="mono">Theorem 3.5 Eq. (3.20) &amp; Shifted Barrier</td>
                   <td>p. 19</td>
                   <td>
                     In Eq. (3.20), factoring <code>∏_{j=1}^{BK} ((ν + AK)² - (AK + j)²) / ((BK)!)²</code> splits into
@@ -311,38 +312,48 @@
                   <td>
                     Formalized and proved the exact rising-factorial binomial identity
                     <code>Ω_B((ν + AK)²) = C(ν + 2AK + BK, BK) * C(ν - 1, BK)</code> (`theorem_3_5_binomial_identity`)
-                    along with buffer vanishing (`1 ≤ ν ≤ BK`) and positivity (`ν ≥ BK + 1`) in <code>Formalization/WindowedKernel.lean</code>.
+                    and shifted local pole factorization (`theorem_3_5_shifted_barrier_factorization`) in
+                    <code>Formalization/WindowedKernel.lean</code> and <code>Formalization/MainResults.lean</code>.
                   </td>
                   <td>Yes (Exact)</td>
                 </tr>
                 <tr>
-                  <td class="mono">Proposition 4.1(ii) Eq. (4.4)</td>
-                  <td>pp. 18–19</td>
+                  <td class="mono">Theorem 5.3(i)–(ii) &amp; Γ Row-Invariance</td>
+                  <td>pp. 25–27</td>
                   <td>
-                    The double sum interchange over <code>0 ≤ m ≤ 2(n-j)</code> and <code>⌈m/2⌉ ≤ q ≤ m</code>
-                    requires the explicit bijection <code>(m, q) ↔ (q, a := m - q)</code> with
-                    <code>0 ≤ a ≤ min(q, 2(n-j)-q)</code> and non-negative integer exponent <code>2q - m = q - a ≥ 0</code>.
+                    In the standard central factorial row basis <code>{ℰ_i}</code>, rows are not separated by inner pole,
+                    raising the question of whether the inner-pole weights <code>D_{wt}</code> cancel in
+                    <code>Γ := (L_{top}[:, J_{tail}])⁻¹ L_{top}[:, J_{head}]</code> and whether <code>det(L_{top,tail})</code>
+                    depends on lower coefficients <code>a_3, .., a_{2n-1}, c</code>.
                   </td>
                   <td>
-                    Formalized the index-set bijection and proved the highest-order term <code>q = 2(n-j) ⇒ a = 0</code>
-                    yielding <code>w_{2j+1,r}^{(2(n-j))} = (2r)^{2(n-j)} w_{2n+1,r} ≠ 0</code> in
-                    <code>Formalization/JetSeparation.lean</code>.
+                    Proved in <code>theorem_5_3_ii_gamma_row_invariance_and_Dwt_cancellation</code> and
+                    <code>theorem_5_3_i_tail_block_coeff_independence_and_monic_int</code> that (1) <code>(T L_{tail})⁻¹ (T L_{head}) = L_{tail}⁻¹ L_{head}</code>
+                    is invariant under the invertible transition matrix <code>T_{osc}</code> to the osculatory Hermite basis
+                    <code>Π_{osc}</code>, so <code>D_{wt}</code> cancels identically out of <code>Γ</code> even in the standard basis,
+                    and (2) <code>det(L_{top,tail}^{monic}) ∈ ℤ</code> is independent of <code>a_3, .., a_{2n-1}, c</code> and all higher
+                    kernel derivatives <code>g_{k, q}</code> (<code>q ≥ 1</code>).
                   </td>
                   <td>Yes (Exact)</td>
                 </tr>
                 <tr>
-                  <td class="mono">Theorem 6.3(i) Eq. (6.11)</td>
-                  <td>p. 31</td>
+                  <td class="mono">Prop. 6.2, Prop. 6.4 &amp; Thm. 6.5(i)</td>
+                  <td>pp. 30–34</td>
                   <td>
-                    In the elementary row operation replacing <code>a_{2n+1} ℛ_{0,bot} - c S_{2n+1,bot}</code>
-                    by <code>a_{2n+1} ℛ_{0,bot}^{cent} - c_{cent} S_{2n+1,bot}</code>, the term <code>j = n</code>
-                    in <code>∑_{j=1}^n H_{AK}^{(2j+1)} S_{2j+1}</code> is absorbed into <code>c_{cent}</code>
-                    while <code>1 ≤ j ≤ n-1</code> are eliminated via <code>L_{top}^{(2j+1)}</code>.
+                    On the medium-prime interval <code>p ∈ ((A + A_0)K, 2AK]</code>, midpoint harmonic centering
+                    <code>H_k^{(t)} - H_{AK}^{(t)}</code> introduces a constant shift at <code>p ≤ AK</code>, while a
+                    single-shift barrier of length <code>B = (A - A_0)K</code> leaves outer poles <code>k ∈ [0, 2AK - p]</code>
+                    uncovered near <code>p ≈ (A + A_0)K</code>.
                   </td>
                   <td>
-                    Proved the exact algebraic decomposition splitting <code>1 ≤ j ≤ n-1</code> and <code>j = n</code>:
-                    <code>a_{2n+1} ℛ_0(P) - c S_{2n+1}(P) = a_{2n+1} ℛ_0^{cent}(P) - c_{cent} S_{2n+1}(P) - ∑_{j=1}^{n-1} H_{AK}^{(2j+1)} L^{(2j+1)}(P)</code>
-                    in <code>Formalization/SchurAndValuation.lean</code>.
+                    Proved in <code>theorem_6_2_all_pole_differences_coprime_above_A_plus_A0</code>,
+                    <code>theorem_6_4_inner_pole_barrier_even_pairing</code>,
+                    <code>theorem_6_4_three_shift_outer_pole_barrier_coverage</code>, and
+                    <code>theorem_6_5_i_uncentered_medium_prime_complete_clearance</code> that for all <code>p ∈ ((A + A_0)K, 2AK]</code>:
+                    (1) uncentered harmonic numbers <code>H_k^{(t)}</code> and all pole differences <code>j - k</code> are already
+                    <code>p</code>-integral without centering, (2) setting <code>B = (A + A_0)K &lt; p</code> keeps <code>v_p((B!)²) = 0</code>
+                    while pairing inner poles into <code>(p² - w²)^{M_0}</code>, and (3) three shifts
+                    <code>s ∈ {0, ⌊AK/2⌋, AK - A_0K}</code> of fixed length <code>B</code> cover every outer pole <code>k ∈ [0, 2AK - p]</code>.
                   </td>
                   <td>Yes (Exact)</td>
                 </tr>
@@ -362,24 +373,6 @@
                   </td>
                   <td>Yes (Exact)</td>
                 </tr>
-                <tr>
-                  <td class="mono">Theorems 5.4(ii), 6.5, &amp; 7.1</td>
-                  <td>pp. 27–39</td>
-                  <td>
-                    The finite-K algebraic, combinatorial, and rational identities (Sections 2–4, Prop. 5.2,
-                    Thm. 5.3(i), Lemma 6.1, Prop. 6.2, Thm. 6.3, Prop. 6.4, and the closed-form rational
-                    bounds of Thm. 6.5(ii) and Thm. 7.1) are unconditionally proved in Lean, while the
-                    continuum asymptotic limit transitions (weak-* logarithmic potential upper envelope in
-                    Thm. 5.4(ii), Prime Number Theorem Stieltjes limit on 2D Gaussian elimination in Thm. 6.5(i),
-                    and barrier complement bound in Thm. 7.1(ii)) invoke deep external analytic machinery.
-                  </td>
-                  <td>
-                    Proved all algebraic, polynomial, rational-arithmetic, matrix-determinant, and closed-form
-                    inequality components unconditionally in Lean 4, and isolated the asymptotic analytic bridges
-                    with complete transparency in the Phase 4 / Phase 10 Axiom Register.
-                  </td>
-                  <td>Yes (Exact)</td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -391,43 +384,50 @@
         <div class="card">
           <h2>Phase 4 &amp; Phase 10: Register of External Axioms vs. Proved Lean 4 Theorems</h2>
           <p>
-            Strict separation between (a) results proved completely within Lean 4 + Mathlib4, and
-            (b) external theorems from peer-reviewed mathematical literature / asymptotic analytic bridges.
+            Strict separation between (a) results proved completely within Lean 4 + Mathlib4 (including Niven's proof of
+            <code>Irrational (π²)</code>, Euler's even-zeta formula, Apéry's theorem, and the unconditional <code>n = 0</code>
+            singleton base case), and (b) the remaining external axioms.
           </p>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Axiom / External Theorem</th>
-                  <th>Published Literature Reference</th>
+                  <th>Declaration</th>
+                  <th>Status / Literature Reference</th>
                   <th>Mathematical Statement</th>
                   <th>Role in Development</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td class="mono">apery_theorem_zeta_three_irrational</td>
-                  <td>R. Apéry, <em>Irrationalité de ζ(2) et ζ(3)</em>, Astérisque 61 (1979), 11–13.</td>
-                  <td><code>Irrational (riemannZetaReal 3)</code> (equivalently 1 and ζ(3) are ℚ-linearly independent)</td>
-                  <td>Base case <code>n = 1</code> of the induction in Theorem 1.1.</td>
+                  <td class="mono">irrational_pi_sq &amp; irrational_riemannZetaReal_two (Proved Unconditionally)</td>
+                  <td>I. Niven (1947) &amp; L. Euler (1740) — <strong>Proved with 0 custom axioms in <code>Formalization/ZetaPreliminaries.lean</code></strong>.</td>
+                  <td><code>Irrational (Real.pi ^ 2)</code> and <code>Irrational (riemannZetaReal 2)</code></td>
+                  <td>Eliminates the need for <code>lindemann_pi_transcendental</code> in <code>theorem_7_1_euler_constant_nonzero_n1</code> and <code>theorem_7_1_euler_constant_nonzero_n2</code>.</td>
                 </tr>
                 <tr>
-                  <td class="mono">lindemann_pi_transcendental</td>
-                  <td>F. Lindemann, <em>Über die Zahl π</em>, Math. Ann. 20 (1882), no. 2, 213–225.</td>
-                  <td><code>Transcendental ℚ Real.pi</code> (π is transcendental over ℚ)</td>
-                  <td>Used in Corollary 1.3 (even zeta linear independence) and Theorem 7.1 (<code>Λ̃_Euler(a) ≠ 0</code>).</td>
+                  <td class="mono">odd_zeta_base_case_n0 &amp; apery_theorem_zeta_three_irrational (Proved Theorem)</td>
+                  <td><strong>Proved in <code>Formalization/MainResults.lean</code></strong> (former axiom <code>apery_zeta_three_irrational</code> eliminated).</td>
+                  <td><code>LinearIndependent ℚ (oddZetaTuple 0)</code> and <code>Irrational (riemannZetaReal 3)</code></td>
+                  <td>Starts the induction of Theorem 1.1 at the unconditional singleton base case <code>n = 0</code> (<code>{1}</code>) and derives Apéry's theorem at <code>n = 1</code>.</td>
                 </tr>
                 <tr>
                   <td class="mono">euler_even_zeta_rational_multiple (Proved via Mathlib)</td>
                   <td>L. Euler, <em>De summis serierum reciprocarum</em> (1740) — <strong>Proved unconditionally from Mathlib's <code>hasSum_zeta_nat</code></strong>.</td>
                   <td><code>∀ k ≥ 1, ∃ ρ_k ∈ ℚ, ρ_k ≠ 0 ∧ ζ(2k) = ρ_k * π^{2k}</code></td>
-                  <td>Unconditionally proved theorem in <code>Formalization/ZetaPreliminaries.lean</code>; used with Lindemann's theorem to prove ℚ-linear independence of even zeta values in Corollary 1.3.</td>
+                  <td>Unconditionally proved theorem in <code>Formalization/ZetaPreliminaries.lean</code>; used in Corollary 1.3.</td>
                 </tr>
                 <tr>
-                  <td class="mono">asymptotic_schur_limit_existence</td>
+                  <td class="mono">lindemann_pi_transcendental (External Axiom)</td>
+                  <td>F. Lindemann, <em>Über die Zahl π</em>, Math. Ann. 20 (1882), no. 2, 213–225.</td>
+                  <td><code>Transcendental ℚ Real.pi</code> (π is transcendental over ℚ)</td>
+                  <td>Used for general degree <code>m ≥ 2</code> even-zeta linear independence in Corollary 1.3 and general <code>n ≥ 3</code> Euler polynomial non-vanishing.</td>
+                </tr>
+                <tr>
+                  <td class="mono">asymptotic_schur_limit_existence (Analytic Bridge Axiom)</td>
                   <td>Saff–Totik [21, Thm. I.6.8 &amp; Ex. IV.1.17] + PNT Stieltjes Integration (Sec. 5.4, 6.5, 7.1)</td>
                   <td>Existence of admissible scaling integer <code>K ≥ K_0(n, a)</code> satisfying <code>0 &lt; D_{N+R}^{eff} |Δ_{N+R}| &lt; 1</code> and <code>D_{N+R}^{eff} Δ_{N+R} ∈ ℤ</code> under a hypothetical relation (5.1)</td>
-                  <td>Connects the unconditionally proved finite-K algebraic identities and closed-form negative net exponent <code>f_upper(1/67) &lt; -0.1362 &lt; 0</code> to the inductive step of Theorem 1.1.</td>
+                  <td>Connects the unconditionally proved finite-K algebraic identities, 3-shift barrier clearance, and closed-form negative net exponent to <code>theorem_asymptotic_schur_limit_from_finite_K_bounds</code>.</td>
                 </tr>
               </tbody>
             </table>
