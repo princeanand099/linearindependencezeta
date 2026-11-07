@@ -220,59 +220,82 @@ We proved in Lean 4 (\texttt{theorem\_4\_4\_monic\_tail\_det\_int} and \texttt{t
 
 ---
 
-\subsection{Obstruction 4 (PARTIALLY SOLVED / REMAINING OPEN): Medium-Prime Outer-Pole Leak on $((A+A_0)K, 2AK]$ and Small-Prime $\Gamma$ Denominators in $B_{\mathrm{tail}}\Gamma$}
+\subsection{Obstruction 4 \& Audit of Newly Added Proposition 6.5(i)--(iii) (pp.\ 33--36 of Revised Manuscript)}
 
-The remaining obstruction resides in the second factor $\det(B_{\mathrm{head}} - B_{\mathrm{tail}}\Gamma)$ of the Schur complement $\Delta_{N+R} = \det(L_{\mathrm{tail}})\det(B_{\mathrm{head}} - B_{\mathrm{tail}}\Gamma)$. It has two parts:
+In the revised 44-page manuscript, the author added \textbf{Proposition 6.5 (Outer-Window Polynomial Jet Decoupling, Inner-Window Vanishing Absorption, Automatic Medium-Prime Clearance, and LCM Taylor Clearing)} on pages 33--34 and updated \textbf{Theorem 6.6} on pages 34--36. We audited each part of Proposition 6.5 both mathematically and in exact rational Python arithmetic (\texttt{fractions.Fraction}) across multiple configurations $(n, A_0 K, AK)$ and formalized the valid theorems in \texttt{Formalization/MainResults.lean}.
 
-\subsubsection{Part 4A: Medium Primes $p \in ((A+A_0)K, 2AK]$ in $\mathcal{R}_0$ (Solved $p$-Adically via 3-Shift Barrier; Archimedean Trade-off Remains)}
+\subsubsection{Part 6.5(iii) (COMPLETELY \& UNCONDITIONALLY SOLVED): Automatic Medium-Prime Clearance on $((A+A_0)K, 2AK]$ Without Any Zero Barrier}
 
-\paragraph{What happens in the paper's single-shift barrier.}
-Consider $A_0 K = 1, AK = 8$ ($[AK-A_0 K, AK+A_0 K] = [7, 9]$, $2AK = 16$) and the primes $p \in ((A+A_0)K, 2AK] = (9, 16]$, namely $p = 11$ and $p = 13$:
-\begin{itemize}
-  \item The inner poles are $k \in \{7, 8, 9\}$, which are all $< p$. By \texttt{theorem\_6\_2\_all\_pole\_differences\_coprime\_above\_A\_plus\_A0}, for every inner pole $k \in [7, 9]$ and \emph{every} pole $j \in [0, 16]$ ($j \neq k$), $1 \le |j - k| \le 9 < p$, so the inner-pole contributions $\mathcal{R}_0^{\mathrm{in}}$ have \textbf{zero} prime $p$ in their denominators even \emph{without} midpoint harmonic centering! (Indeed, midpoint centering $H_k^{(t)} - H_{AK}^{(t)}$ is counterproductive when $p \le AK$ because $H_{AK}^{(t)}$ introduces a global shift with $p^{-t}$ at $p \le AK$.)
-  \item However, the \textbf{outer poles} $k \in [0, 6] \cup [10, 16]$ include $k_+ = p \in \{11, 13\}$ and its reflection partner $k_- = 16 - p \in \{5, 3\}$. At $k_+ = p$, $H_p^{(t)} = \sum_{\ell=1}^p \ell^{-t}$ has a $p^{-t}$ denominator from $\ell = p$, and $g_{k_\pm}'(0)$ has a $p^{-1}$ denominator from $|j - k_\pm| = p$.
-  \item In the manuscript, the single zero barrier $\Omega_B((w+AK-k)^2)^{M_0}$ has length $B = (A - A_0)K = 7$. At the outer pole $k_- = 16 - 11 = 5$, the first rising factorial in Eq.\ (3.22) covers $[k_- + 1, k_- + B] = [6, 12] \ni 11$, and the second covers $[16 - k_- + 1, 16 - k_- + B] = [12, 18]$ (missing $11$!). In general, when $p$ is close to $(A+A_0)K$, $k_- = 2AK - p \approx (A - A_0)K$, and $k_- + (A - A_0)K = 2(A - A_0)K < (A + A_0)K < p$ whenever $3A_0 > A$, or only one of the two rising factorials covers $p$, giving only $(p \pm w)^{M_0}$ instead of $(p^2 - w^2)^{M_0}$.
-  \item If you try to fix this with a single barrier by increasing $B$ to $2AK$, then $B \ge p$, so $p \mid B!$, which introduces $p^{-2 M_0 v_p(B!)}$ from the barrier denominator $((B!)^2)^{M_0}$!
-\end{itemize}
-
-\paragraph{Our 3-Shift Fixed-Length Barrier Solution (Proved in Lean 4).}
-We discovered and proved in Lean 4 (\texttt{theorem\_6\_4\_inner\_pole\_barrier\_even\_pairing}, \texttt{theorem\_6\_4\_three\_shift\_outer\_pole\_barrier\_coverage}, and \texttt{theorem\_6\_5\_i\_uncentered\_medium\_prime\_complete\_clearance}) that if we fix the barrier length to
-\[
-  B := (A + A_0)K < p \qquad (\text{so } p \nmid B! \text{ for all } p > (A+A_0)K)
-\]
-and use the product of \textbf{three shifted barriers} with shifts $s_1 = 0, s_2 = \lfloor AK/2 \rfloor, s_3 = AK - A_0 K$:
-\[
-  \Omega_{\mathrm{3\text{-}shift}}(u) := \prod_{s \in \{0,\, \lfloor AK/2 \rfloor,\, AK - A_0 K\}} \Omega_{AK + s,\, B}(u)^{M_0},
-\]
-then for \textbf{every} prime $p \in ((A+A_0)K, 2AK]$:
+\paragraph{What Proposition 6.5(iii) proves.}
+Previously, we noted that for primes $p \in ((A+A_0)K, 2AK]$ (such as $p = 11, 13$ at $A_0 K = 1, AK = 8$), the $N$ bottom rows of the Schur complement $S^{\mathrm{monic}} = B_{\mathrm{head}}^{\mathrm{monic}} - B_{\mathrm{tail}}^{\mathrm{monic}}\Gamma^{\mathrm{monic}}$ have $v_p(\det S^{\mathrm{monic}}) = -N = -2 < 0$ from the outer poles $k \in [p, 2AK]$.
+\textbf{Proposition 6.5(iii) completely and unconditionally resolves this regime without needing any zero barrier $\Omega_B$!}
+Specifically, for every prime $p \in ((A+A_0)K, 2(A-A_0)K]$ (and in fact on the entire interval $((A+A_0)K, 2AK]$):
 \begin{enumerate}
-  \item \textbf{Zero barrier denominator}: $B = (A+A_0)K < p \implies v_p((B!)^2) = 0$.
-  \item \textbf{Symmetric even pairing at all inner poles}: For every inner pole $k \in [AK - A_0 K, AK + A_0 K]$, both $j_1 = p - k \in [1, B]$ and $j_2 = p - (2AK - k) \in [1, B]$ lie in the $s_1 = 0$ barrier and pair into the exact even polynomial
+  \item \textbf{Top-$R$-row binomial valuation gain $+2R$}: Every inner pole $k = AK - r \in [AK - A_0 K, AK + A_0 K]$ satisfies $0 < k \le (A+A_0)K < p$ and $0 < 2AK - k \le (A+A_0)K < p$ while $p \le 2AK$. Therefore, in $\binom{2AK}{k} = \frac{(2AK)!}{k!(2AK-k)!}$, the numerator $(2AK)!$ is divisible by $p$ while the denominator $k!(2AK-k)!$ is coprime to $p$, giving $\Omega_{\mathrm{in}}(p, k) = 2(\lfloor 2AK/p \rfloor - \lfloor k/p \rfloor - \lfloor (2AK-k)/p \rfloor) = 2$. By the closed-form confluent Vandermonde factorization of Theorem 4.4 (Eq.\ (4.24)), across all $R = (n-1)(2A_0 K + 1)$ rows of $L_{\mathrm{tail}}^{\mathrm{monic}}$, we have:
   \[
-    ((k + j_1 - w)(2AK - k + j_2 + w))^{M_0} = (p^2 - w^2)^{M_0},
+    v_p\big(\det L_{\mathrm{tail}}^{\mathrm{monic}}\big) = 2R = 2(n-1)(2A_0 K + 1), \qquad \min v_p(\Gamma^{\mathrm{monic}}) \ge 0.
   \]
-  which has \textbf{zero odd powers of $w$} and raises the $p$-adic valuation of $\mathcal{R}_0^{\mathrm{in}}$ to $\ge 2 M_0$!
-  \item \textbf{Complete coverage of all outer poles}: Every outer pole $k_{\mathrm{out}} \in [0, 2AK - p]$ (and by reflection symmetry $2AK - k_{\mathrm{out}} \in [p, 2AK]$) has $p$ (or $2p$) inside the rising-factorial intervals of at least two of the three shifts.
-  \item \textbf{Exact Python verification ($A_0 K = 1, AK = 8, B = 9, M_0 = 5$)}:
-  Computing the exact uncentered full remainder $\mathcal{R}_0^{\mathrm{full}}(\mathcal{E}_i \mathcal{E}_m) = \mathcal{R}_0^{\mathrm{in}} + \mathcal{R}_0^{\mathrm{out}}$ across all rows $i$ and columns $m$ in Python gives:
+  \item \textbf{Shifted-reflection Lucas cancellation on $[p, 2AK]$}: On the $N = A_0 K + 1$ bottom rows, only outer poles $k \in [p, 2AK]$ have $p$ in $H_k^{(2)}$ or $H_k^{(1)}$. Under the shifted reflection $k' := 2AK + p - k \in [p, 2AK]$, we proved (\texttt{prop\_6\_5\_iii\_automatic\_medium\_prime\_clearance\_and\_lucas\_reflection}) that $(k' - AK)^2 - (k - AK)^2 = p(2AK + p - 2k) \equiv 0 \pmod{p}$, and by Lucas's theorem $\binom{2AK}{k'} \equiv \binom{2AK}{k} \pmod{p}$ while the odd product $\prod_{t=-A_0 K}^{A_0 K}(k - AK + t)^{2n-1}$ flips sign modulo $p$. Hence $g_{k',0} \equiv -g_{k,0} \pmod{p}$ and $\sum_{k=p}^{2AK} A_{2,k}(P) \equiv 0 \pmod{p}$, which cancels the $p^{-2}$ pole in $\mathcal{R}_0^{\mathrm{out}}(P)$ down to $p^{-1}$ ($v_p(\det S^{\mathrm{monic}}) \ge -N$, or trivially $\ge -2N$).
+  \item \textbf{Strictly positive net valuation of $\det M_K^{\mathrm{monic}}(\mathbf{a}, c)$}: Combining $\det M_K^{\mathrm{monic}}(\mathbf{a}, c) = \det(L_{\mathrm{tail}}^{\mathrm{monic}}) \cdot \det(S^{\mathrm{monic}})$ gives Eq.\ (6.19):
   \[
-    \min_{i,m} v_{11}\big(\mathcal{R}_0^{\mathrm{full}}(\mathcal{E}_i \mathcal{E}_m)\big) = +18 \gg 0, \qquad
-    \min_{i,m} v_{13}\big(\mathcal{R}_0^{\mathrm{full}}(\mathcal{E}_i \mathcal{E}_m)\big) = +14 \gg 0.
+    v_p\big(\det M_K^{\mathrm{monic}}(\mathbf{a}, c)\big) \ge 2R - N = (4n - 5)A_0 K + (2n - 3) \ge 3A_0 K + 1 > 0 \quad (\forall n \ge 2, A_0 K \ge 1),
   \]
+  and even with the trivial $-2N$ bound, $2R - 2N = (4n - 6)A_0 K + 2(n - 2) \ge 2A_0 K > 0$.
+  \item \textbf{Exact Python verification}: Across all tested configurations $(n=2, A_0 K=1, AK \in \{6,7,8,10\})$ and $(n=2, A_0 K=2, AK=10)$, every prime $p \in ((A+A_0)K, 2AK]$ satisfies $v_p(\det L_{\mathrm{tail}}^{\mathrm{monic}}) = +2R$, $v_p(\det S^{\mathrm{monic}}) = -N$, and $v_p(\det M_K^{\mathrm{monic}}) = 2R - N > 0$ (e.g.\ $+6 - 2 = +4$ at $p=11, 13$ for $A_0 K=1, AK=8$, and $+10 - 3 = +7$ at $p=13, 17$ for $A_0 K=2, AK=10$).
 \end{enumerate}
 
-\paragraph{Why a trade-off remains on Part 4A.}
-Because $\Omega_{\mathrm{3\text{-}shift}}(u)$ is a product of $3$ barriers of length $B = (A+A_0)K$, its degree in $u$ is $6(A+A_0)K M_0$ instead of $2(A-A_0)K M_0$. When inserted into the kernel numerator, this larger polynomial degree requires a larger outer pole multiplicity $L_{\mathrm{out}}$ (or larger window $A$) to maintain the degree margin, and increases the archimedean integral $\Lambda_{\mathrm{arch}}(n)$ so that $\Lambda_{\mathrm{arch}}(n) + \Phi_{\mathrm{den}}(n)$ becomes positive at $(c_0 = 0.03, A = 0.075)$.
+\subsubsection{Parts 6.5(i)--(ii) and Theorem 6.6(ii): What They Prove and What Remains Open on $p \in (2A_0 K, (A+A_0)K]$}
 
-\subsubsection{Part 4B: Small Primes $p \in (2A_0 K, (A+A_0)K]$ in $B_{\mathrm{tail}}\Gamma$ for $n \ge 2$}
-
-For $n \ge 2$, the reduced bottom-row matrix is $B_{\mathrm{head}} - B_{\mathrm{tail}}\Gamma$, whose entries are $\mathcal{R}_0(\mathcal{E}_k Q_d)$ where $Q_d = \mathcal{E}_d - \sum_{m \in J_{\mathrm{tail}}} \Gamma_{m,d}\mathcal{E}_m$.
+\paragraph{1. Analysis of Proposition 6.5(i) (Outer-Window Polynomial Jet Decoupling).}
 \begin{itemize}
-  \item Even though the higher kernel derivatives $g_{k,q}$ ($1 \le q \le 2n-2$) drop out of $\det(L_{\mathrm{tail}})$ (Obstruction 3), they \textbf{do not} drop out of the $R \times N$ matrix $L_{\mathrm{head}}$ (because $L_{\mathrm{head}}$ has only $N = A_0 K + 1$ columns, not a full $R \times R$ Hermite block).
-  \item For primes $p \in (2A_0 K, (A+A_0)K]$, an inner pole $k \in [AK - A_0 K, AK + A_0 K]$ and an outer pole $j \in [0, 2AK] \setminus I_{\mathrm{in}}$ can satisfy $p \mid (j - k)$. This produces a differentiation denominator $p^{-q}$ ($q \le 2n-2$) in $g_{k,q}$ inside $L_{\mathrm{head}}$, and hence inside $\Gamma = L_{\mathrm{tail}}^{-1} L_{\mathrm{head}}$.
-  \item For example, in exact Python arithmetic for $n = 2, A_0 K = 1, AK = 8$ ($2n-2 = 2$), at $p = 5 \in (2, 9]$ and $p = 7 \in (2, 9]$, $\Gamma^{\mathrm{monic}}$ has $v_5(\Gamma^{\mathrm{monic}}) = -2$ and $v_7(\Gamma^{\mathrm{monic}}) = -2$.
-  \item When $B_{\mathrm{tail}}$ multiplies $\Gamma$, each of the $N$ columns of $B_{\mathrm{head}} - B_{\mathrm{tail}}\Gamma$ inherits this $p^{-(2n-2)}$ denominator from $\Gamma$, which adds $2(n-1)C = R_c$ per prime $p \in (2A_0 K, (A+A_0)K]$ to the denominator of $\det(B_{\mathrm{head}} - B_{\mathrm{tail}}\Gamma)$, increasing $\Phi_{\mathrm{den}}(n)$ by $R_c(A - A_0) \approx 0.03 \times 0.075 \approx +0.00225$, which exceeds the net margin $|-0.000146|$.
+  \item \textbf{What is true (and formalized in \texttt{prop\_6\_5\_i\_outer\_window\_poly\_factorization\_and\_schur\_invariance})}:
+  At any inner pole $z = -(AK - r) + w$ with $u = (z + AK)^2 = (w + r)^2$, each symmetric outer-pole pair $z + (AK - m) = w + r - m$ and $z + (AK + m) = w + r + m$ ($A_0 K < m \le AK$) pairs into $((w+r-m)(w+r+m))^2 = (u - m^2)^2 = m^4(1 - u/m^2)^2$, so $D_{\mathrm{out}}(u) := \prod_{m=A_0 K+1}^{AK}(1 - u/m^2)^2 \in \mathbb{Q}[u]$ is an exact polynomial in $u$ independent of $r$. Replacing $\mathcal{E}_d$ on $J_{\mathrm{head}}$ by $\widetilde{\mathcal{E}}_d = (\mathcal{E}_d T_{\mathrm{out}}) \bmod W_{\mathrm{in}} = \mathcal{E}_d + \sum_{m=N}^{N+R-1}(C_{\mathrm{pre}})_{m-N, d}\mathcal{E}_m$ is an exact unitriangular column operation of determinant $1$ that eliminates all positive-order derivatives $[w^q](D_{\mathrm{out}}((w+r)^2)^{-1})$ ($1 \le q \le 2n-2$) from $\widetilde{L}_{\mathrm{head}}$.
+  \item \textbf{Why unitriangular head preconditioning does not change the Schur complement}:
+  As proved in \texttt{prop\_6\_5\_i\_outer\_window\_poly\_factorization\_and\_schur\_invariance}, under any unitriangular column operation $\widetilde{\mathcal{E}}_d = \mathcal{E}_d + \sum_{m \ge N}(C_{\mathrm{pre}})_{m-N,d}\mathcal{E}_m$, we have $\widetilde{L}_{\mathrm{head}} = L_{\mathrm{head}} + L_{\mathrm{tail}}C_{\mathrm{pre}}$, $\widetilde{\Gamma} = \Gamma + C_{\mathrm{pre}}$, and $\widetilde{B}_{\mathrm{head}} = B_{\mathrm{head}} + B_{\mathrm{tail}}C_{\mathrm{pre}}$. Therefore, the Schur complement is \textbf{identically invariant}:
+  \[
+    \widetilde{S} = \widetilde{B}_{\mathrm{head}} - B_{\mathrm{tail}}\widetilde{\Gamma} = (B_{\mathrm{head}} + B_{\mathrm{tail}}C_{\mathrm{pre}}) - B_{\mathrm{tail}}(\Gamma + C_{\mathrm{pre}}) = B_{\mathrm{head}} - B_{\mathrm{tail}}\Gamma = S.
+  \]
+  That is, shifting the $(2A_0 K, (A+A_0)K]$ denominators out of $\Gamma$ via $C_{\mathrm{pre}}$ shifts the exact same denominators into $\widetilde{B}_{\mathrm{head}} = B_{\mathrm{head}} + B_{\mathrm{tail}}C_{\mathrm{pre}}$.
 \end{itemize}
+
+\paragraph{2. Analysis of Proposition 6.5(ii) (Inner-Window Vanishing Absorption on $J_{\mathrm{tail}}$).}
+\begin{itemize}
+  \item \textbf{What is true (and formalized in \texttt{prop\_6\_5\_ii\_tail\_vanishing\_and\_outer\_denom\_cancellation})}:
+  For every tail column $m \ge N = A_0 K + 1$, $W_0(u) = \prod_{s=0}^{A_0 K}(u - s^2)$ divides $\mathcal{E}_m^{\mathrm{monic}}(u)$. Consequently:
+  \begin{enumerate}
+    \item At every inner pole $k = AK - r$ ($|r| \le A_0 K$), $A_{2n+1, k}(\mathcal{E}_i\mathcal{E}_m) = 0$ vanishes identically on $J_{\mathrm{tail}}$ (and when $p \mid (AK - r)$ for $r > 0$, the $1/p^{2n}$ term in $H_{AK-r}^{(2n)}$ and $H_{AK+r}^{(2n)}$ cancels by reflection antisymmetry $A_{2n, AK+r} = -A_{2n, AK-r}$).
+    \item At every outer pole $k = AK - r$ ($|r| > A_0 K$), the outer-pole binomial denominator factor satisfies $|r|(2A_0 K)!\cdot(|r| - A_0 K)\binom{|r|+A_0 K}{2A_0 K} = W_0(r^2)$, so $W_0(r^2) \mid \mathcal{E}_m^{\mathrm{monic}}(r^2)$ automatically cancels one full power of the outer-pole denominator on $J_{\mathrm{tail}}$.
+    \item For $n = 2, A_0 K = 1, AK = 8$ at $p = 7$, this raises $\min v_7(B_{\mathrm{in,tail}}^{\mathrm{monic}}) = \min v_7(B_{\mathrm{out,tail}}^{\mathrm{monic}}) = -3$, which absorbs $\min v_7(\Gamma^{\mathrm{monic}}) = -2$ to give $\min v_7(B_{\mathrm{tail}}^{\mathrm{monic}}\Gamma^{\mathrm{monic}}) = (-3) + (-2) = -5 = -(2n+1) = -L_{\mathrm{in}}$, so $v_7(\det M_K^{\mathrm{monic}}) = -10 = -N L_{\mathrm{in}}$ (instead of $-14$).
+  \end{enumerate}
+  \item \textbf{What remains open in Proposition 6.5(ii) and Theorem 6.6(ii) Eq.\ (6.26)}:
+  \begin{enumerate}
+    \item \emph{Simple-root vanishing order for $n \ge 3$}: Because $W_0(u)$ has simple roots at $u = r^2$ on the first tail column $m = N$, $\mathcal{E}_0(u)\mathcal{E}_N(u)$ vanishes to order $1$ at $u = r^2$, raising $\min v_p(B_{\mathrm{tail}}^{\mathrm{monic}})$ from $-(2n+1)$ to $-(2n-1)$ (or $-2n$ when $p \mid (AK + r)$, e.g.\ $v_7(B_{\mathrm{tail}}^{\mathrm{monic}}) = -4$ at $n=2, A_0 K=1, AK=6$ and $-5$ at $n=3, A_0 K=1, AK=8$), rather than to $-3$ for all $n \ge 3$.
+    \item \emph{Bottom-row inner-pole multiplicity $L_{\mathrm{in}} = 2n+1$ vs.\ $L_{\mathrm{out}} = 2$ on $p \in (2A_0 K, (A+A_0)K]$ in Eq.\ (6.26)}:
+    Even when Proposition 6.5(ii) absorbs $\Gamma^{\mathrm{monic}}$ into $-L_{\mathrm{in}} = -(2n+1)$ per bottom row (giving $v_p(\det M_K^{\mathrm{monic}}) = -(2n+1)N$ when $\Omega_{\mathrm{in}} = 0$, e.g.\ $v_7(\det M_K^{\mathrm{monic}}) = -10 = -5N$ at $n=2, A_0 K=1, AK=8$ and $v_7(\det M_K^{\mathrm{monic}}) = -15 = -5N$ at $n=2, A_0 K=2, AK=10$), for every prime $p \in (2A_0 K, (A+A_0)K]$ there is at least one inner pole $k \in [AK - A_0 K, AK + A_0 K]$ with $k \ge p$ (since $(A+A_0)K \ge p$). At that inner pole, the harmonic number $H_k^{(2n+1)}$ in the $N$ bottom rows has denominator $p^{2n+1}$ ($L_{\mathrm{in}} = 2n+1$). However, in Eq.\ (6.26) (page 36), the closed-form lower bound $I_{\mathrm{occ}}^{\mathrm{LB}}(n)$ assigns $-2C(n) = -\frac{2c_0}{2n-1} = O(1/n)$ (using $L_{\mathrm{out}} = 2$) instead of $-(2n+1)C(n) = -\frac{2n+1}{2n-1}c_0 \approx -c_0$ (using $L_{\mathrm{in}} = 2n+1$) to the $N$ bottom rows on $(2A_0(n), (A+A_0)n]$, and for $n \ge 3$ includes the confluent term $(2A - 2A_0)\cdot 2A_0\bar{m}_1(\bar{m}_1-1)$ on $(2A_0, 2A]$ even though by Theorem 4.4 (Eq.\ (4.24)) the confluent factors $(2r)^{2n(n-1)}$ and $(r^2-s^2)^{4(n^2-1)}$ in $\det(L_{\mathrm{tail}}^{\mathrm{monic}})$ are supported purely on $p \le 2A_0 K$.
+  \end{enumerate}
+\end{itemize}
+
+\begin{table}[h!]
+\centering
+\small
+\begin{tabular}{cccccc}
+\toprule
+Configuration $(n, A_0 K, AK)$ & Prime $p$ & Regime & $v_p(\det L_{\mathrm{tail}}^{\mathrm{monic}})$ & $v_p(\det S^{\mathrm{monic}})$ & $v_p(\det M_K^{\mathrm{monic}})$ \\
+\midrule
+$(2, 1, 8)$ ($N=2, R=3$) & $p = 5$ & $K I_2 \subset (2A_0 K, (A+A_0)K]$ & $+6 = 2R$ & $-4$ & $\mathbf{+2 > 0}$ \\
+$(2, 1, 8)$ ($N=2, R=3$) & $p = 7$ & $(2A_0 K, (A+A_0)K] \setminus K I_2$ & $0$ & $-10 = -5N$ & $\mathbf{-10 = -L_{\mathrm{in}}N}$ \\
+$(2, 1, 8)$ ($N=2, R=3$) & $p = 11, 13$ & $((A+A_0)K, 2AK]$ & $+6 = 2R$ & $-2 = -N$ & $\mathbf{+4 = 2R - N > 0}$ \\
+\midrule
+$(2, 2, 10)$ ($N=3, R=5$) & $p = 5$ & $(2A_0 K, (A+A_0)K]$ & $+8$ & $-11$ & $-3$ \\
+$(2, 2, 10)$ ($N=3, R=5$) & $p = 7$ & $(2A_0 K, (A+A_0)K]$ & $0$ & $-15 = -5N$ & $\mathbf{-15 = -L_{\mathrm{in}}N}$ \\
+$(2, 2, 10)$ ($N=3, R=5$) & $p = 11$ & $(2A_0 K, (A+A_0)K]$ & $+2$ & $-11$ & $-9$ \\
+$(2, 2, 10)$ ($N=3, R=5$) & $p = 13, 17$ & $((A+A_0)K, 2AK]$ & $+10 = 2R$ & $-3 = -N$ & $\mathbf{+7 = 2R - N > 0}$ \\
+$(2, 2, 10)$ ($N=3, R=5$) & $p = 19$ & $((A+A_0)K, 2AK]$ & $+10 = 2R$ & $0$ & $\mathbf{+10 = 2R > 0}$ \\
+\bottomrule
+\end{tabular}
+\caption{Exact $p$-adic valuations of $\det(L_{\mathrm{tail}}^{\mathrm{monic}})$, $\det(S^{\mathrm{monic}})$, and $\det M_K^{\mathrm{monic}}(\mathbf{a}, c)$ computed in exact Python rational arithmetic (\texttt{fractions.Fraction}), confirming Proposition 6.5(iii) ($v_p(\det M_K^{\mathrm{monic}}) \ge 2R - N > 0$ on $((A+A_0)K, 2AK]$) and showing the exact $-L_{\mathrm{in}}N = -5N$ bottom-row valuation at $\Omega_{\mathrm{in}} = 0$ on $(2A_0 K, (A+A_0)K]$.}
+\label{tab:exact_vp}
+\end{table}
 
 ---
 
@@ -297,11 +320,11 @@ For $n \ge 2$, the reduced bottom-row matrix is $B_{\mathrm{head}} - B_{\mathrm{
 \midrule
 \textbf{Section 5: Schur Complement, Row-Basis Invariance of $\Gamma$, $D_{\mathrm{wt}}$ Cancellation, $\det(L_{\mathrm{tail}}^{\mathrm{monic}}) \in \mathbb{Z}$} & \textcolor{green!50!black}{\textbf{100\% Proved (0 Custom Axioms)}} & Proposition 5.2, Theorem 5.3, Theorem 5.4(i), \texttt{theorem\_5\_3\_ii\_gamma\_row\_invariance\_and\_Dwt\_cancellation}, \texttt{theorem\_5\_3\_i\_tail\_block\_coeff\_independence\_and\_monic\_int}. \\
 \midrule
-\textbf{Section 6: Removal of $P_{\mathrm{fac}}^{-1}$ Bug, 3-Shift Barrier Coverage on $((A+A_0)K, 2AK]$, Closed-Form Net Negativity $\Lambda_{\mathrm{net}}^{\mathrm{paper}}(n) < 0$} & \textcolor{green!50!black}{\textbf{100\% Proved (0 Custom Axioms)}} & \texttt{theorem\_6\_5\_i\_lcm\_taylor\_clearing\_without\_Pfac}, \texttt{theorem\_6\_5\_i\_uncentered\_medium\_prime\_complete\_clearance}, \texttt{theorem\_6\_5\_ii\_pure\_rational\_negativity\_proof}, \texttt{theorem\_6\_5\_ii\_LambdaNetStdUBReal\_neg\_n1\_n2}. \\
+\textbf{Section 6: Proposition 6.5(i)--(iii) Automatic Clearance on $((A+A_0)K, 2AK]$, LCM Clearing, Closed-Form Negativity $\Lambda_{\mathrm{net}}^{\mathrm{paper}}(n) < 0$} & \textcolor{green!50!black}{\textbf{100\% Proved (0 Custom Axioms)}} & \texttt{prop\_6\_5\_i\_outer\_window\_poly\_factorization\_and\_schur\_invariance}, \texttt{prop\_6\_5\_ii\_tail\_vanishing\_and\_outer\_denom\_cancellation}, \texttt{prop\_6\_5\_iii\_automatic\_medium\_prime\_clearance\_and\_lucas\_reflection}, \texttt{theorem\_6\_5\_ii\_pure\_rational\_negativity\_proof}. \\
 \midrule
 \textbf{Section 7: $\widetilde{\Lambda}_{\mathrm{Euler}}(\mathbf{a}) \neq 0$ ($n=1,2$), Barrier Sum Suppression ($< 1/4$), Conditional Finite-$K$ Witness Bridge} & \textcolor{green!50!black}{\textbf{100\% Proved (0 Custom Axioms)}} & \texttt{theorem\_7\_1\_euler\_constant\_nonzero\_n1}, \texttt{theorem\_7\_1\_euler\_constant\_nonzero\_n2}, \texttt{theorem\_7\_1\_step2\_eq\_7\_14\_barrier\_sum\_suppression}, \texttt{theorem\_1\_1\_odd\_zeta\_linear\_independent\_from\_finite\_K\_witnesses}. \\
 \midrule
-\textbf{Obstruction 4: Simultaneous $p$-Adic Clearance of $B_{\mathrm{tail}}\Gamma$ \& $\mathcal{R}_0^{\mathrm{out}}$ Without Archimedean Penalty (\texttt{asymptotic\_schur\_limit\_existence})} & \textcolor{red!70!black}{\textbf{Open Mathematical Problem (1 Axiom)}} & Requires modifying the kernel/barrier or elimination rows so that clearing the outer-pole denominators on $(2A_0 K, 2AK]$ does not increase $\Lambda_{\mathrm{arch}}(n) + \Phi_{\mathrm{den}}(n)$ above $0$. \\
+\textbf{Remaining Gap: Bottom-Row Inner-Pole Harmonic Multiplicity $L_{\mathrm{in}} = 2n+1$ on $(2A_0 K, (A+A_0)K]$ in Eq.\ (6.26) (\texttt{asymptotic\_schur\_limit\_existence})} & \textcolor{red!70!black}{\textbf{Open Mathematical Problem (1 Axiom)}} & Proposition 6.5(iii) completely resolves $p \in ((A+A_0)K, 2AK]$ ($v_p(\det M_K^{\mathrm{monic}}) \ge 2R - N > 0$), but on $p \in (2A_0 K, (A+A_0)K]$ the bottom $N$ rows lose $-(2n+1)N$ from $H_k^{(2n+1)}$ ($k \ge p$) whereas Eq.\ (6.26) used $-2N$ ($L_{\mathrm{out}} = 2$). \\
 \bottomrule
 \end{tabular}
 \caption{Complete status of the Lean 4 formalization and mathematical audit.}

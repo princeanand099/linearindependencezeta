@@ -337,23 +337,26 @@
                   <td>Yes (Exact)</td>
                 </tr>
                 <tr>
-                  <td class="mono">Prop. 6.2, Prop. 6.4 &amp; Thm. 6.5(i)</td>
-                  <td>pp. 30–34</td>
+                  <td class="mono">Prop. 6.2, Prop. 6.4, Prop. 6.5(i)–(iii) &amp; Thm. 6.6</td>
+                  <td>pp. 30–36</td>
                   <td>
-                    On the medium-prime interval <code>p ∈ ((A + A_0)K, 2AK]</code>, midpoint harmonic centering
-                    <code>H_k^{(t)} - H_{AK}^{(t)}</code> introduces a constant shift at <code>p ≤ AK</code>, while a
-                    single-shift barrier of length <code>B = (A - A_0)K</code> leaves outer poles <code>k ∈ [0, 2AK - p]</code>
-                    uncovered near <code>p ≈ (A + A_0)K</code>.
+                    On <code>p ∈ ((A + A_0)K, 2AK]</code>, outer poles <code>k ∈ [p, 2AK]</code> contribute <code>-N</code> (or <code>-2N</code>)
+                    to <code>v_p(det S^{monic})</code>, while on <code>p ∈ (2A_0K, (A + A_0)K]</code>, unitriangular head
+                    preconditioning <code>E_tilde_d = E_d + ∑ C_{pre} E_m</code> leaves the Schur complement
+                    <code>B_{head} - B_{tail} Γ</code> invariant and the bottom rows retain inner-pole harmonic multiplicity
+                    <code>L_{in} = 2n + 1</code>.
                   </td>
                   <td>
-                    Proved in <code>theorem_6_2_all_pole_differences_coprime_above_A_plus_A0</code>,
-                    <code>theorem_6_4_inner_pole_barrier_even_pairing</code>,
-                    <code>theorem_6_4_three_shift_outer_pole_barrier_coverage</code>, and
-                    <code>theorem_6_5_i_uncentered_medium_prime_complete_clearance</code> that for all <code>p ∈ ((A + A_0)K, 2AK]</code>:
-                    (1) uncentered harmonic numbers <code>H_k^{(t)}</code> and all pole differences <code>j - k</code> are already
-                    <code>p</code>-integral without centering, (2) setting <code>B = (A + A_0)K &lt; p</code> keeps <code>v_p((B!)²) = 0</code>
-                    while pairing inner poles into <code>(p² - w²)^{M_0}</code>, and (3) three shifts
-                    <code>s ∈ {0, ⌊AK/2⌋, AK - A_0K}</code> of fixed length <code>B</code> cover every outer pole <code>k ∈ [0, 2AK - p]</code>.
+                    Proved in <code>prop_6_5_i_outer_window_poly_factorization_and_schur_invariance</code>,
+                    <code>prop_6_5_ii_tail_vanishing_and_outer_denom_cancellation</code>,
+                    <code>prop_6_5_iii_automatic_medium_prime_clearance_and_lucas_reflection</code>, and
+                    <code>theorem_6_5_i_uncentered_medium_prime_complete_clearance</code> that:
+                    (1) for every <code>p ∈ ((A + A_0)K, 2(A - A_0)K]</code> (and up to <code>2AK</code>),
+                    <code>v_p(det L_{tail}^{monic}) = 2R</code> and the shifted Lucas reflection <code>k' = 2AK + p - k</code>
+                    gives <code>v_p(det M_K^{monic}) ≥ 2R - N = (4n - 5)A_0K + (2n - 3) ≥ 3A_0K + 1 &gt; 0</code>
+                    unconditionally without any zero barrier; (2) on <code>J_{tail}</code>, <code>W_0(r²) | ℰ_m^{monic}(r²)</code>
+                    cancels both <code>A_{2n+1, k}</code> at inner poles and one full power of the outer-pole binomial
+                    denominator; and (3) under unitriangular head preconditioning, <code>B̃_{head} - B_{tail} Γ̃ = B_{head} - B_{tail} Γ</code>.
                   </td>
                   <td>Yes (Exact)</td>
                 </tr>

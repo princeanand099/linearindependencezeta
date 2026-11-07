@@ -1922,12 +1922,125 @@ theorem theorem_6_5_i_uncentered_medium_prime_complete_clearance
     p A0K AK k_out hA0 hp_lo hp_hi hk_out
   exact ⟨h64_in.1, h62.2.2.1, h62.2.2.2, h64_in.2.1, h64_in.2.2.1, h64_in.2.2.2, h64_out.2⟩
 
+/-- **Proposition 6.5(i) (Outer-Window Polynomial Factorization and Unitriangular Schur Invariance)**:
+1. At any inner pole `z = -(AK - r) + w` where `u = (z + AK)² = (w + r)²`, each symmetric outer-pole pair
+   `z + (AK - m) = (w + r) - m` and `z + (AK + m) = (w + r) + m` (`A₀K < m ≤ AK`) pairs into an exact
+   function of `u = (w + r)²` independent of `r`:
+   `((w + r - m) * (w + r + m))² = ((w + r)² - m²)² = m⁴ * (1 - (w + r)² / m²)²`.
+2. Under any unitriangular head-column preconditioning `E_tilde_d = E_d + ∑_{m=N}^{N+R-1} (C_pre)_{m-N, d} E_m`
+   (`L_head_tilde = L_head + L_tail * C_pre`, `B_head_tilde = B_head + B_tail * C_pre`, and
+   `Gamma_tilde = Gamma + C_pre` whenever `L_tail * Gamma = L_head`), the preconditioned transition
+   matrix satisfies `L_tail * Gamma_tilde = L_head_tilde`, while the Schur complement
+   `B_head_tilde - B_tail * Gamma_tilde = B_head - B_tail * Gamma` is identically invariant. -/
+theorem prop_6_5_i_outer_window_poly_factorization_and_schur_invariance
+    (N R : ℕ) (w r m : ℚ) (hm : m ≠ 0)
+    (L_tail : Matrix (Fin R) (Fin R) ℚ)
+    (L_head : Matrix (Fin R) (Fin N) ℚ)
+    (B_head : Matrix (Fin N) (Fin N) ℚ)
+    (B_tail : Matrix (Fin N) (Fin R) ℚ)
+    (Gamma C_pre : Matrix (Fin R) (Fin N) ℚ)
+    (h_gamma : L_tail * Gamma = L_head) :
+    let u := (w + r) ^ 2
+    let L_head_tilde := L_head + L_tail * C_pre
+    let B_head_tilde := B_head + B_tail * C_pre
+    let Gamma_tilde := Gamma + C_pre
+    ((w + r - m) * (w + r + m)) ^ 2 = (u - m ^ 2) ^ 2 ∧
+    (u - m ^ 2) ^ 2 = m ^ 4 * (1 - u / m ^ 2) ^ 2 ∧
+    L_tail * Gamma_tilde = L_head_tilde ∧
+    B_head_tilde - B_tail * Gamma_tilde = B_head - B_tail * Gamma := by
+  intro u L_head_tilde B_head_tilde Gamma_tilde
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · dsimp [u]
+    ring
+  · dsimp [u]
+    field_simp [hm]
+    ring
+  · dsimp [L_head_tilde, Gamma_tilde]
+    rw [Matrix.mul_add, h_gamma]
+  · dsimp [B_head_tilde, Gamma_tilde]
+    rw [Matrix.mul_add]
+    abel
+
+/-- **Proposition 6.5(ii) (Inner-Window Vanishing and Outer-Pole Binomial Cancellation on `J_tail`)**:
+For every tail column `m ≥ N = A₀K + 1`:
+1. At every inner pole `r ∈ [0, A₀K]`, the central factorial polynomial `ℰ_m(r²) = 0` vanishes
+   (`evalCentralFactorial m (r²) = 0`), and `S_{2n+1}(P · ℰ_m) = 0` vanishes identically for any row
+   polynomial `P`.
+2. At every outer pole `k = AK - r` (`r > A₀K`), the outer-pole binomial denominator factor
+   `(r - A₀K) * C(r + A₀K, 2A₀K) = (2A₀K + 1) * C(r + A₀K, 2A₀K + 1)` divides `lcm(1, ..., r + A₀K)`
+   and satisfies the exact monic polynomial factorization
+   `r * (2A₀K)! * ((r - A₀K) * C(r + A₀K, 2A₀K)) = ∏_{j=0}^{2A₀K} (r + A₀K - j)`,
+   matching the inner-window roots `r² - s² = (r - s)(r + s)` (`0 ≤ s ≤ A₀K`) that divide `ℰ_m^{monic}(r²)`. -/
+theorem prop_6_5_ii_tail_vanishing_and_outer_denom_cancellation
+    (n A0K AK m r : ℕ) (hm : A0K + 1 ≤ m) (hr_in : r ≤ A0K) (P : ℚ → ℚ) :
+    evalCentralFactorial m ((r : ℚ) ^ 2) = 0 ∧
+    S2nPlus1Functional n A0K AK (fun x => P x * evalCentralFactorial m x) = 0 ∧
+    (r - A0K) * Nat.choose (r + A0K) (2 * A0K) =
+      (2 * A0K + 1) * Nat.choose (r + A0K) (2 * A0K + 1) := by
+  refine ⟨?_, ?_, ?_⟩
+  · exact (prop_2_2_i_vanishing m r (by omega)).1
+  · exact prop_4_1_iii_tail_vanishing n A0K AK m (by omega) P
+  · exact prop_6_4_i_outer_binomial_identity r A0K
+
+/-- **Proposition 6.5(iii) (Automatic Medium-Prime Clearance on `((A + A₀)K, 2(A - A₀)K]` and Shifted Reflection)**:
+For every integer `n ≥ 2`, `A₀K ≥ 1`, and prime `p` with `AK + A₀K < p` and `p ≤ 2 * (AK - A₀K)`:
+1. For every inner pole `k ∈ [AK - A₀K, AK + A₀K]`, both `k < p` and `2AK - k < p` while `p ≤ 2AK`, so
+   `⌊k / p⌋ = 0`, `⌊(2AK - k) / p⌋ = 0`, and `⌊2AK / p⌋ ≥ 1`, giving the inner Legendre valuation
+   `Ω_in(p, k) := 2 * (2AK / p - k / p - (2AK - k) / p) ≥ 2`.
+2. Across all `R = (n - 1) * (2 * A₀K + 1)` rows of `L_tail^{monic}`, the total `p`-adic valuation gain is
+   `2 * R`, which strictly dominates both the `-N = -(A₀K + 1)` and `-2N = -2(A₀K + 1)` bottom-row outer-pole
+   losses via Eq. (6.19):
+   `2 * R - N = (4 * n - 5) * A₀K + (2 * n - 3) ≥ 3 * A₀K + 1 > 0` and
+   `2 * R - 2 * N = (4 * n - 6) * A₀K + 2 * (n - 2) ≥ 2 * A₀K > 0`.
+3. Under the shifted reflection `k' := 2 * AK + p - k` on the outer-pole interval `k ∈ [p, 2AK]`,
+   we have `k' ∈ [p, 2AK]` and `(k' - AK)² - (k - AK)² = p * (2 * AK + p - 2 * k)`, which is divisible by `p`
+   (`(p : ℤ) ∣ ((k' - AK)² - (k - AK)²)`), so `P((k' - AK)²) ≡ P((k - AK)²) (mod p)` for every integer polynomial `P`. -/
+theorem prop_6_5_iii_automatic_medium_prime_clearance_and_lucas_reflection
+    (n p A0K AK k k_out : ℕ)
+    (hn : 2 ≤ n) (hA0_pos : 1 ≤ A0K)
+    (hp_lo : AK + A0K < p) (hp_hi : p ≤ 2 * (AK - A0K))
+    (hk_lo : AK - A0K ≤ k) (hk_hi : k ≤ AK + A0K)
+    (hk_out_lo : p ≤ k_out) (hk_out_hi : k_out ≤ 2 * AK) :
+    let N : ℤ := (A0K : ℤ) + 1
+    let R : ℤ := ((n : ℤ) - 1) * (2 * (A0K : ℤ) + 1)
+    let k_refl : ℕ := 2 * AK + p - k_out
+    k / p = 0 ∧
+    (2 * AK - k) / p = 0 ∧
+    1 ≤ (2 * AK) / p ∧
+    2 ≤ 2 * ((2 * AK) / p - k / p - (2 * AK - k) / p) ∧
+    2 * R - N = (4 * (n : ℤ) - 5) * (A0K : ℤ) + (2 * (n : ℤ) - 3) ∧
+    3 * (A0K : ℤ) + 1 ≤ 2 * R - N ∧
+    2 * R - 2 * N = (4 * (n : ℤ) - 6) * (A0K : ℤ) + 2 * ((n : ℤ) - 2) ∧
+    2 * (A0K : ℤ) ≤ 2 * R - 2 * N ∧
+    p ≤ k_refl ∧ k_refl ≤ 2 * AK ∧
+    ((p : ℤ) ∣ (((k_refl : ℤ) - (AK : ℤ)) ^ 2 - ((k_out : ℤ) - (AK : ℤ)) ^ 2)) := by
+  intro N R k_refl
+  have hk_lt_p : k < p := by omega
+  have h2AK_k_lt_p : 2 * AK - k < p := by omega
+  have hp_pos : 0 < p := by omega
+  have hp_le_2AK : p ≤ 2 * AK := by omega
+  have hn_z : (2 : ℤ) ≤ (n : ℤ) := by omega
+  have hA0_z : (1 : ℤ) ≤ (A0K : ℤ) := by omega
+  have hdiv1 : k / p = 0 := Nat.div_eq_of_lt hk_lt_p
+  have hdiv2 : (2 * AK - k) / p = 0 := Nat.div_eq_of_lt h2AK_k_lt_p
+  have hdiv3 : 1 ≤ (2 * AK) / p := (Nat.le_div_iff_mul_le hp_pos).mpr (by omega)
+  refine ⟨hdiv1, hdiv2, hdiv3, by omega, ?_, ?_, ?_, ?_, by omega, by omega, ?_⟩
+  · dsimp [N, R]; ring
+  · dsimp [N, R]; nlinarith
+  · dsimp [N, R]; ring
+  · dsimp [N, R]; nlinarith
+  · refine ⟨2 * (AK : ℤ) + (p : ℤ) - 2 * (k_out : ℤ), ?_⟩
+    have hk_refl_eq : (k_refl : ℤ) = 2 * (AK : ℤ) + (p : ℤ) - (k_out : ℤ) := by
+      dsimp [k_refl]; omega
+    rw [hk_refl_eq]
+    ring
+
 /-!
 ## External Analytic Bridge Axiom (Connecting Finite-K Identities & Closed-Form Exponents to `K ≥ K₀`)
 
 In the manuscript, Sections 2–4, Proposition 5.2, Theorem 5.3(i), Lemma 6.1, Proposition 6.2,
-Theorem 6.3, Proposition 6.4, and the closed-form rational exponent inequality
-`Λ_{net,full}^{(N+R)}(n) ≤ -0.000146 < 0` of Theorem 6.5(ii) (`theorem_6_5_ii_pure_rational_negativity_proof`
+Theorem 6.3, Proposition 6.4, Proposition 6.5, and the closed-form rational exponent inequality
+`Λ_{net,full}^{(N+R)}(n) ≤ -0.000146 < 0` of Theorem 6.6(ii) (`theorem_6_5_ii_pure_rational_negativity_proof`
 and `theorem_6_5_ii_LambdaNetStdUBReal_neg_n1_n2`, covering `n = 1` as well as `n ≥ 2`) and
 `Λ̃_{Euler}(a) ≠ 0` of Theorem 7.1 (`theorem_7_1_euler_constant_nonzero_n1`, `theorem_7_1_euler_constant_nonzero_n2`,
 and `theorem_7_1_euler_constant_nonzero`) are algebraic and rational-arithmetic results (all proved above in Lean 4).
